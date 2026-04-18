@@ -56,3 +56,5 @@ python3 -m http.server 8080
 
 슬라이드 콘텐츠 및 본 뷰어 코드의 저작권은 박준(JoonLab)에게 있습니다. All rights reserved.
 
+
+<!-- auto-deploy test: 2026-04-18T04:20:48Z -->
