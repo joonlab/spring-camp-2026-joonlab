@@ -1,0 +1,195 @@
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  color: #fff;
+}
+
+.viewer {
+  position: fixed;
+  inset: 0;
+  background: #000;
+}
+
+.viewer-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #fff;
+}
+
+.overlay {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  opacity: 1;
+}
+
+.overlay[data-hidden="true"] {
+  opacity: 0;
+}
+
+.overlay-top {
+  top: 0;
+  padding: 14px 20px;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.overlay-bottom {
+  bottom: 0;
+  padding: 14px 20px 22px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.overlay > * {
+  pointer-events: auto;
+}
+
+.v-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(20, 20, 20, 0.7);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+.v-btn:hover,
+.v-btn:focus-visible {
+  background: rgba(165, 0, 52, 0.85);
+  border-color: rgba(255, 255, 255, 0.3);
+  outline: none;
+}
+
+.v-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.v-btn.icon {
+  padding: 8px 10px;
+}
+
+.v-counter {
+  font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: #fff;
+  background: rgba(20, 20, 20, 0.7);
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  min-width: 90px;
+  text-align: center;
+}
+
+.v-counter .sep {
+  opacity: 0.4;
+  margin: 0 6px;
+}
+
+.nav-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(20, 20, 20, 0.7);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  transition: background 0.15s ease;
+}
+
+.nav-arrow:hover,
+.nav-arrow:focus-visible {
+  background: rgba(165, 0, 52, 0.85);
+  outline: none;
+}
+
+.nav-arrow svg {
+  width: 18px;
+  height: 18px;
+}
+
+.nav-arrow[disabled] {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.overlay-right {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+@media (max-width: 767px) {
+  .overlay-top {
+    padding: 10px 12px;
+  }
+  .overlay-bottom {
+    padding: 10px 12px 16px;
+  }
+  .v-btn .label-long {
+    display: none;
+  }
+  .v-btn {
+    padding: 8px 12px;
+  }
+}
+
+@media (min-width: 768px) {
+  .overlay-bottom {
+    justify-content: center;
+    gap: 20px;
+  }
+}
+
+.loading {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #111;
+  color: #999;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  z-index: 50;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.loading[data-done="true"] {
+  opacity: 0;
+}

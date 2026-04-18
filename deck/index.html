@@ -1,0 +1,1922 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<title>맥락을 설계하는 개발자 — 박준 (JoonLab)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&family=Noto+Serif+KR:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff;         /* pure white */
+    --bg-deep: #f5f5f5;    /* subtle off-white panel */
+    --paper: #ffffff;
+    --ink: #1a1a1a;        /* near-black ink */
+    --ink-2: #2e2e2e;
+    --muted: #6B6B6B;      /* Neutral Gray */
+    --silver: #8A8D8F;     /* Premium Silver */
+    --rule: #e4e4e4;
+    --rule-soft: #f0f0f0;
+    --accent: #A50034;     /* LG Red */
+    --accent-2: #85714D;   /* Highlight Gold */
+    --ok: #2f6a46;
+    --pending: #b8b8b8;
+    --chalk-bg: #1a1a1a;
+    --chalk: #f5f5f5;
+  }
+  html, body { background: #d0d0d0; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  .serif { font-family: 'Noto Serif KR', 'Noto Serif', Georgia, serif; }
+  .mono  { font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; }
+
+  /* ---------- Base slide ---------- */
+  .slide {
+    background: var(--bg);
+    color: var(--ink);
+    padding: 100px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+  .slide.paper { background: var(--paper); }
+  .slide.cream-deep { background: var(--bg-deep); }
+  .slide.dark { background: #141210; color: #f1ebdc; }
+  .slide.dark .muted { color: #a59c89; }
+
+  /* Global JoonLab logo top-right on every slide */
+  .deck-logo {
+    position: absolute;
+    top: 0px;
+    right: 40px;
+    width: 207px;
+    height: auto;
+    z-index: 10;
+    opacity: 0.95;
+    pointer-events: none;
+  }
+  .slide.dark .deck-logo { filter: invert(1) brightness(1.1); opacity: 0.85; }
+  .slide.no-logo .deck-logo { display: none; }
+
+  /* Header chrome ---------- */
+  .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    font-size: 24px;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    text-transform: uppercase;
+    font-weight: 500;
+    padding-right: 240px;  /* reserve space for logo */
+  }
+  .head .time { font-variant-numeric: tabular-nums; }
+  .head .section-tag { font-weight: 600; color: var(--ink); letter-spacing: 0.08em;}
+
+  /* Progress indicator (homework) */
+  .progress {
+    display: flex;
+    gap: 40px;
+    font-size: 20px;
+    letter-spacing: 0.02em;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .progress .item { display: inline-flex; align-items: center; gap: 10px; }
+  .progress .num { font-family: 'Noto Serif KR', serif; font-weight: 700; color: var(--ink); }
+  .progress .st { font-size: 22px; width: 22px; display: inline-block; text-align: center; }
+  .progress .done { color: var(--ok); }
+  .progress .pend { color: var(--pending); }
+  .progress .cur .st { color: var(--accent-2); }
+  .progress .cur .num { color: var(--accent-2); }
+  .progress .cur .label { color: var(--ink); font-weight: 700; }
+
+  /* Titles */
+  .kicker {
+    font-size: 24px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+  h1.title { font-family: 'Noto Serif KR', serif; font-weight: 700; font-size: 96px; line-height: 1.08; letter-spacing: -0.01em; margin: 0; }
+  h2.title { font-family: 'Noto Serif KR', serif; font-weight: 700; font-size: 72px; line-height: 1.12; letter-spacing: -0.01em; margin: 0; }
+  h3.subtitle { font-weight: 400; font-size: 36px; line-height: 1.4; color: var(--ink-2); margin: 24px 0 0; letter-spacing: -0.005em; }
+  .lead { font-size: 34px; line-height: 1.55; color: var(--ink-2); }
+
+  /* Rules */
+  .hair { border: 0; border-top: 1px solid var(--rule); margin: 40px 0; }
+  .thick-rule { border: 0; border-top: 2px solid var(--ink); margin: 0 0 28px; width: 80px; }
+
+  /* Big number */
+  .big-num {
+    font-family: 'Noto Serif KR', serif;
+    font-weight: 900;
+    font-size: 180px;
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    color: var(--ink);
+  }
+  .big-num .unit { font-size: 56px; font-weight: 600; color: var(--muted); margin-left: 8px; letter-spacing: 0.02em; }
+
+  /* Cards */
+  .card { background: var(--paper); border: 1px solid var(--rule); padding: 40px; box-sizing: border-box; }
+  .card.dark { background: #1a1815; border-color: #2e2a24; color: #f1ebdc; }
+
+  /* Code/mono styling */
+  .mono-box { background: #141210; color: #e8e2ce; padding: 32px 36px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 24px; line-height: 1.6; }
+  .mono-box .c { color: #8a8270; }
+  .mono-box .k { color: #e0a96d; }
+
+  /* Watermark chapter number */
+  .watermark {
+    position: absolute;
+    font-family: 'Noto Serif KR', serif;
+    font-weight: 900;
+    font-size: 360px;
+    line-height: 0.8;
+    color: #A50034;
+    opacity: 0.06;
+    top: 110px;
+    right: 120px;
+    letter-spacing: -0.08em;
+    pointer-events: none;
+    user-select: none;
+    z-index: 0;
+  }
+
+  /* Utility */
+  .flex { display: flex; }
+  .row { display: flex; }
+  .col { display: flex; flex-direction: column; }
+  .grow { flex: 1; }
+  .gap-8 { gap: 8px; } .gap-16 { gap: 16px; } .gap-24 { gap: 24px; } .gap-32 { gap: 32px; } .gap-40 { gap: 40px; } .gap-56 { gap: 56px; } .gap-80 { gap: 80px; }
+  .center { justify-content: center; align-items: center; }
+  .between { justify-content: space-between; }
+  .w-half { flex: 1 1 50%; }
+  .pill { display: inline-block; padding: 8px 18px; border: 1px solid var(--ink); border-radius: 999px; font-size: 20px; letter-spacing: 0.06em; font-weight: 500; text-transform: uppercase;}
+  .accent { color: var(--accent); }
+  .accent2 { color: var(--accent-2); }
+  .muted { color: var(--muted); }
+  .ink { color: var(--ink); }
+
+  /* Tables */
+  table.grid {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 26px;
+    line-height: 1.45;
+  }
+  table.grid th, table.grid td {
+    text-align: left;
+    padding: 20px 22px;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  table.grid thead th {
+    font-size: 20px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 14px;
+  }
+  table.grid td.first { font-weight: 600; }
+
+  /* Slide-level classes */
+  .fill { flex: 1; }
+
+  /* Chalkboard look for slide 2 */
+  .chalk {
+    background: var(--chalk-bg);
+    color: var(--chalk);
+    padding: 36px 48px;
+    border-radius: 4px;
+    font-family: 'Noto Serif KR', serif;
+    position: relative;
+    box-shadow: inset 0 0 80px rgba(0,0,0,0.3);
+  }
+  .chalk .chalk-num { font-size: 46px; font-weight: 900; color: #f6eac2; margin-right: 16px; }
+  .chalk .chalk-q { font-size: 40px; font-weight: 600; letter-spacing: -0.005em; line-height: 1.35; }
+  .chalk .chalk-sub { font-size: 24px; color: #b6ad90; margin-top: 8px; font-family: 'Noto Sans KR'; }
+  .chalk .state { margin-top: 12px; font-size: 22px; letter-spacing: 0.08em; font-family: 'JetBrains Mono', monospace; color: #9a9176;}
+
+  /* Footer */
+  .foot {
+    display: flex;
+    justify-content: space-between;
+    font-size: 24px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+
+  /* For chapter markers */
+  .chap-label { font-size: 28px; letter-spacing: 0.32em; color: var(--accent); text-transform: uppercase; font-weight: 600;}
+
+  /* Speaker slash separator */
+  .dot-sep::before { content: '·'; margin: 0 14px; color: var(--muted); }
+
+  /* KPI grid */
+  .kpi {
+    background: var(--paper);
+    border-top: 3px solid var(--ink);
+    padding: 44px 40px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    min-height: 340px;
+  }
+  .kpi .role { font-size: 22px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); font-weight: 600;}
+  .kpi .num { font-family: 'Noto Serif KR', serif; font-size: 150px; line-height: 0.9; font-weight: 900; letter-spacing: -0.04em; color: var(--ink); }
+  .kpi .num .u { font-size: 44px; font-weight: 600; color: var(--muted); margin-left: 6px; }
+  .kpi .label { font-size: 24px; color: var(--ink-2); line-height: 1.4; margin-top: auto; }
+
+  /* Timeline bars (slide 5) */
+  .timeline { display: flex; border: 2px solid var(--ink); height: 100px; font-size: 20px; }
+  .timeline .seg { display: flex; flex-direction: column; justify-content: center; padding: 10px 16px; border-right: 1px solid var(--ink); color: var(--ink); font-weight: 500; }
+  .timeline .seg:last-child { border-right: 0; }
+  .timeline .seg .t { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 600;}
+  .timeline .seg .n { font-size: 24px; font-weight: 600; margin-top: 4px;}
+  .timeline .seg .d { font-size: 18px; color: var(--muted); margin-top: 2px;}
+  .timeline .chap { background: rgba(165,0,52,0.08); }
+  .timeline .demo { background: rgba(133,113,77,0.15); }
+  .timeline .meta { background: #f0f0f0; }
+
+  /* Bullet styles */
+  ul.clean { list-style: none; padding: 0; margin: 0; }
+  ul.clean li { padding: 14px 0; border-bottom: 1px solid var(--rule-soft); font-size: 28px; line-height: 1.45; }
+  ul.clean li:last-child { border-bottom: 0; }
+  ul.clean li b { font-weight: 700; color: var(--ink); }
+  ul.clean.tight li { padding: 10px 0; font-size: 26px; }
+
+  /* Emphasis */
+  .hl { background: linear-gradient(transparent 62%, rgba(165,0,52,0.14) 62%, rgba(165,0,52,0.14) 94%, transparent 94%); padding: 0 2px; color: var(--accent); font-weight: 700; }
+  .hl2 { background: linear-gradient(transparent 62%, rgba(133,113,77,0.18) 62%, rgba(133,113,77,0.18) 94%, transparent 94%); padding: 0 2px; color: var(--accent-2); font-weight: 700; }
+
+  /* Radar chart (slide 6) - use CSS clip-path or SVG inline (acceptable, simple pentagon) */
+
+  /* Tree / trees for slide 13-14 */
+  .tree { font-family: 'JetBrains Mono', monospace; font-size: 22px; line-height: 1.7; color: var(--ink-2); }
+  .tree .node { padding: 2px 0; }
+  .tree .star { color: var(--accent-2); font-weight: 700; }
+  .tree .hdr { font-size: 22px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); font-weight: 700; margin-top: 14px; margin-bottom: 10px; font-family: 'Noto Sans KR'; border-top: 1px solid var(--rule); padding-top: 14px;}
+  .tree .hdr:first-child { border-top: 0; padding-top: 0; margin-top: 0;}
+
+  /* Flow diagram (slide 13) */
+  .flow-node {
+    align-self: center;
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    padding: 16px 36px;
+    font-size: 28px;
+    font-weight: 600;
+    min-width: 360px;
+    text-align: center;
+    border-radius: 2px;
+  }
+  .flow-node.accent-node { background: var(--ink); color: var(--paper); }
+  .flow-arrow { align-self: center; width: 2px; height: 28px; background: var(--ink); position: relative; }
+  .flow-arrow::after { content: ''; position: absolute; bottom: -2px; left: -6px; border: 7px solid transparent; border-top-color: var(--ink); }
+
+  /* Quote blocks */
+  .quote {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 58px;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    font-weight: 500;
+    color: var(--ink);
+  }
+  .quote.sm { font-size: 44px; }
+  .quote.xs { font-size: 36px; }
+  .quote .mark { color: var(--accent-2); font-family: 'Noto Serif KR', serif;}
+
+  /* Radar chart SVG styling */
+  .radar-label { font-size: 20px; font-weight: 600; fill: var(--ink); font-family: 'Noto Sans KR'; letter-spacing: 0.02em; }
+  .radar-sub   { font-size: 16px; fill: var(--muted); font-family: 'Noto Sans KR'; }
+
+</style>
+</head>
+<body>
+
+<deck-stage width="1920" height="1080">
+
+<!-- ============================ SLIDE 1 — TITLE ============================ -->
+<section data-label="01 Title" class="slide paper">
+  <div class="head">
+    <div><span class="section-tag">2026 지식관리 스프링캠프</span></div>
+    <div>마지막 세션 &nbsp;·&nbsp; 16:00–17:00</div>
+  </div>
+
+  <div style="flex:1; display:flex; flex-direction:column; justify-content:center; max-width: 1500px;">
+    <div class="kicker">SESSION 08 — KEYNOTE</div>
+    <h1 class="title">맥락을 설계하는 개발자</h1>
+    <h3 class="subtitle" style="font-family:'Noto Serif KR'; font-size:56px; font-weight:400; color: var(--muted); margin-top: 32px; letter-spacing: -0.005em;">
+      기록이 일하게 만드는 법
+    </h3>
+
+    <hr class="hair" style="margin: 60px 0 36px; width: 200px; border-color: var(--ink);">
+
+    <div style="display:flex; gap:80px; font-size: 26px; color: var(--ink-2); line-height: 1.6;">
+      <div>
+        <div class="mono" style="font-size: 24px; letter-spacing:0.08em; color: var(--muted); text-transform: uppercase; margin-bottom: 6px;">Speaker</div>
+        <div style="font-weight: 700; font-size: 32px;">박준 <span style="color: var(--muted); font-weight:400;">/ JoonLab</span></div>
+        <div style="color: var(--muted); margin-top: 4px;">LLM 연구 · AI 강사 · 컨설턴트 · 개발자</div>
+      </div>
+      <div>
+        <div class="mono" style="font-size: 24px; letter-spacing:0.08em; color: var(--muted); text-transform: uppercase; margin-bottom: 6px;">When</div>
+        <div style="font-weight: 700; font-size: 32px;">2026-04-18 <span style="color:var(--muted); font-weight:400;">(토)</span></div>
+        <div style="color: var(--muted); margin-top: 4px;">16:00 — 17:00 · 60분</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot" style="margin-top: auto; align-items: flex-end;">
+    <div class="serif" style="font-size: 28px; font-style: italic; color: var(--ink-2); max-width: 1200px; line-height: 1.5;">
+      “AI는 스스로 움직이지 않는다. 설계자가 맥락을 만들고, 맥락이 판단을 만든다.”
+    </div>
+    <div style="font-size: 24px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 600;">01 / 28</div>
+  </div>
+</section>
+
+
+<!-- ============================ SLIDE 2 — SELF INTRO ============================ -->
+<section data-label="02 Self Intro" class="slide paper">
+  <div class="head">
+    <div class="section-tag">Self-Intro</div>
+    <div class="time">16:00 · Intro</div>
+  </div>
+
+  <div style="flex: 1; display: flex; gap: 80px; align-items: center; margin-top: 20px;">
+    <!-- Left column: name + bio -->
+    <div style="flex: 1.45; display: flex; flex-direction: column;">
+      <div class="kicker" style="margin-bottom: 20px;">SPEAKER · HELLO</div>
+      <div style="display: flex; align-items: baseline; gap: 28px; flex-wrap: wrap;">
+        <div class="serif" style="font-size: 84px; font-weight: 700; letter-spacing: 0.08em; line-height: 1;">박 &nbsp;준</div>
+        <div style="font-size: 52px; font-weight: 800; letter-spacing: 0.04em; line-height: 1; color: var(--muted);">PARK&nbsp;JOON</div>
+      </div>
+
+      <div style="margin-top: 44px; display: flex; flex-direction: column; gap: 22px;">
+        <div style="display: flex; align-items: baseline; gap: 24px; font-size: 32px;">
+          <span style="width: 12px; height: 12px; border-radius: 50%; background: var(--ink); flex-shrink: 0; transform: translateY(-4px);"></span>
+          <div>교토대학교 <b>인공지능 석사</b></div>
+        </div>
+        <div style="display: flex; align-items: baseline; gap: 24px; font-size: 32px;">
+          <span style="width: 12px; height: 12px; border-radius: 50%; background: var(--ink); flex-shrink: 0; transform: translateY(-4px);"></span>
+          <div><b>LLM 서비스</b> 기획 및 개발</div>
+        </div>
+        <div style="display: flex; align-items: baseline; gap: 24px; font-size: 32px;">
+          <span style="width: 12px; height: 12px; border-radius: 50%; background: var(--ink); flex-shrink: 0; transform: translateY(-4px);"></span>
+          <div><b>LG · SKT · SK 그룹 · 국립농업과학원 · 패스트캠퍼스</b> 등 출강 및 컨설팅</div>
+        </div>
+        <div style="height: 2px; background: var(--ink); width: 140px; margin: 8px 0 8px 36px;"></div>
+        <div style="display: flex; align-items: baseline; gap: 24px; font-size: 32px;">
+          <span style="width: 12px; height: 12px; border-radius: 50%; background: var(--ink); flex-shrink: 0; transform: translateY(-4px);"></span>
+          <div>국내 최대 AI 커뮤니티 <b>GPTers</b> 특강 다수 진행</div>
+        </div>
+        <div style="display: flex; align-items: baseline; gap: 24px; font-size: 32px;">
+          <span style="width: 12px; height: 12px; border-radius: 50%; background: var(--ink); flex-shrink: 0; transform: translateY(-4px);"></span>
+          <div><a href="https://open.kakao.com/o/gl7JSkSg" target="_blank" rel="noopener" style="color: var(--ink); text-decoration: underline; text-decoration-color: var(--accent); text-underline-offset: 4px;">준랩의 지식 공유방</a> · 유튜브 채널 <a href="https://www.youtube.com/@joonlab98" target="_blank" rel="noopener" style="color: var(--ink); text-decoration: underline; text-decoration-color: var(--accent); text-underline-offset: 4px;"><b>준랩 │ JoonLab</b></a> 운영</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right column: portrait + contact -->
+    <div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 40px;">
+      <div style="position: relative;">
+        <div style="position: absolute; inset: -8px; border: 1px solid var(--rule); border-radius: 50%;"></div>
+        <img src="assets/park_joon_final.png" alt="박준" style="width: 440px; height: 440px; border-radius: 50%; object-fit: cover; display: block; box-shadow: 0 8px 40px rgba(0,0,0,0.08);"/>
+      </div>
+      <div style="border-top: 2px solid var(--ink); padding-top: 20px; width: 440px; font-family: 'JetBrains Mono', monospace; font-size: 24px; line-height: 1.75; color: var(--ink-2);">
+        <div><span style="color: var(--muted);">TEL</span> &nbsp; 010-5060-9188</div>
+        <div><span style="color: var(--muted);">MAIL</span>&nbsp; wns9133@gmail.com</div>
+        <div><span style="color: var(--muted);">BIO</span> &nbsp; bio.link/joonpark</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot" style="margin-top: 20px;">
+    <div></div>
+    <div>02 / 29</div>
+  </div>
+</section>
+
+
+<!-- ============================ SLIDE 3 — 3 HOMEWORKS ============================ -->
+<section data-label="02 Homework" class="slide cream-deep">
+  <div class="head">
+    <div class="section-tag">Handoff</div>
+    <div class="time">16:00 · Intro</div>
+  </div>
+
+  <div style="margin-top: 36px;">
+    <div class="kicker">BATON TOUCH</div>
+    <h2 class="title">타래님이 남긴 3가지 숙제</h2>
+    <h3 class="subtitle">오늘 60분 동안, 이 칠판을 하나씩 지워갑니다.</h3>
+  </div>
+
+  <div class="row gap-56" style="margin-top: 64px; flex: 1;">
+    <!-- Chalkboard with 3 homework items -->
+    <div class="chalk" style="flex: 1.15; display: flex; flex-direction: column; gap: 22px; justify-content: center;">
+      <div>
+        <div style="display: flex; align-items: baseline;">
+          <span class="chalk-num">①</span>
+          <div>
+            <div class="chalk-q">구조</div>
+            <div class="chalk-sub">어떤 구조로 만들어지는가?</div>
+            <div class="state">[ 현재 상태 &nbsp;·&nbsp; — &nbsp; 대기 ]</div>
+          </div>
+        </div>
+      </div>
+      <div style="border-top: 1px dashed #3a4a40;"></div>
+      <div>
+        <div style="display: flex; align-items: baseline;">
+          <span class="chalk-num">②</span>
+          <div>
+            <div class="chalk-q">분리와 연결</div>
+            <div class="chalk-sub">어떻게 나뉘어 있고, 어떻게 연결되는가?</div>
+            <div class="state">[ 현재 상태 &nbsp;·&nbsp; — &nbsp; 대기 ]</div>
+          </div>
+        </div>
+      </div>
+      <div style="border-top: 1px dashed #3a4a40;"></div>
+      <div>
+        <div style="display: flex; align-items: baseline;">
+          <span class="chalk-num">③</span>
+          <div>
+            <div class="chalk-q">자율성</div>
+            <div class="chalk-sub">어떻게 매일 알아서 움직이는가?</div>
+            <div class="state" style="margin-top: 10px;">[ 현재 상태 &nbsp;·&nbsp; — &nbsp; 대기 ]</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mapping -->
+    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+      <div class="mono" style="font-size: 24px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 20px;">오늘의 매핑</div>
+
+      <div style="border-left: 2px solid var(--ink); padding-left: 28px; display: flex; flex-direction: column; gap: 18px;">
+        <div style="font-size: 28px; line-height: 1.4;">
+          <div class="mono" style="font-size: 24px; color: var(--accent); letter-spacing: 0.1em;">CH.1 · CH.2</div>
+          <div style="font-weight: 600; margin-top: 2px;">구조 · 분리연결</div>
+        </div>
+        <div style="font-size: 28px;">
+          <div class="mono" style="font-size: 24px; color: var(--accent); letter-spacing: 0.1em;">CH.3 — BONUS</div>
+          <div style="font-weight: 600; margin-top: 2px;">개입 설계</div>
+        </div>
+        <div style="font-size: 28px;">
+          <div class="mono" style="font-size: 24px; color: var(--accent); letter-spacing: 0.1em;">CH.4</div>
+          <div style="font-weight: 600; margin-top: 2px;">자율성</div>
+        </div>
+      </div>
+
+      <div style="margin-top: 36px; font-size: 22px; color: var(--muted); line-height: 1.55; font-style: italic;" class="serif">
+        숙제 진행도는 매 장 상단에 작게 표시됩니다.
+        <br>● 진행 중 &nbsp;·&nbsp; ✔ 완료 &nbsp;·&nbsp; — 대기
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================ SLIDE 3 — APP → MAIN ============================ -->
+<section data-label="03 Two Angles" class="slide">
+  <div class="head">
+    <div class="section-tag">Positioning</div>
+    <div class="time">16:01 · Intro</div>
+  </div>
+
+  <div style="margin-top: 36px;">
+    <div class="kicker">TWO ANGLES · ONE PRINCIPLE</div>
+    <h2 class="title">같은 원리, 다른 관점</h2>
+    <h3 class="subtitle">타래님은 <b style="font-weight:600;">개인의 삶</b>에서, 박준은 <b style="font-weight:600;">업무·프로덕션</b>에서.</h3>
+  </div>
+
+  <div style="flex: 1; display: flex; align-items: center; margin-top: 50px;">
+    <table class="grid" style="font-size: 28px;">
+      <thead>
+        <tr>
+          <th style="width: 16%; font-size: 24px;">구분</th>
+          <th style="width: 42%; color: var(--muted); font-size: 24px;">관점 A · 개인의 삶</th>
+          <th style="width: 42%; color: var(--ink); font-size: 24px;">관점 B · 업무 · 프로덕션</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="first">무대</td>
+          <td style="color: var(--muted);">일상 · 가족 · 관계</td>
+          <td style="font-weight: 600;">업무 &nbsp;/&nbsp; 프로덕션</td>
+        </tr>
+        <tr>
+          <td class="first">톤</td>
+          <td style="color: var(--muted);">감정적 · 따뜻함</td>
+          <td style="font-weight: 600;">구조적 · 실전적</td>
+        </tr>
+        <tr>
+          <td class="first">예시</td>
+          <td style="color: var(--muted);">고양이 가족 일화</td>
+          <td style="font-weight: 600;">코드베이스 · 자동화 · 팀</td>
+        </tr>
+        <tr>
+          <td class="first">코드</td>
+          <td style="color: var(--muted);">없음</td>
+          <td style="font-weight: 600;" class="accent2">라이브 데모 포함</td>
+        </tr>
+        <tr>
+          <td class="first">메시지</td>
+          <td style="color: var(--muted);">“AI는 가족이 될 수 있다”</td>
+          <td style="font-weight: 600;">“AI는 내가 기록한 만큼 나답게 일한다”</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+
+</section>
+
+
+<!-- ============================ SLIDE 4 — CORE MESSAGE ============================ -->
+<section data-label="04 Core Message" class="slide paper" style="padding: 140px 160px;">
+  <div class="head">
+    <div class="section-tag">Thesis</div>
+    <div class="time">16:02 · Intro</div>
+  </div>
+
+  <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+    <div class="kicker" style="margin-bottom: 40px;">CORE MESSAGE</div>
+    <h2 class="title" style="font-size: 84px; line-height: 1.3;">
+      <span class="hl2">재료</span>는 내가 저장한 나.
+      <br>
+      <span class="hl">설계</span>는 내가 만든 구조.
+    </h2>
+    <h3 class="subtitle" style="font-family: 'Noto Serif KR'; font-size: 44px; margin-top: 48px; color: var(--muted);">
+      AI는 설계된 만큼 일한다.
+    </h3>
+
+    <hr class="hair" style="margin: 80px 0 48px; width: 140px; border-color: var(--ink);">
+
+    <div class="serif" style="font-size: 38px; line-height: 1.6; color: var(--ink-2); display: flex; flex-direction: column; gap: 14px;">
+      <div>AI는 스스로 움직이지 않는다.</div>
+      <div>설계자가 맥락을 만들고, 맥락이 판단을 만든다.</div>
+      <div>기록은 재료가 되고, 설계는 흐름을 만든다.</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================ SLIDE 5 — 60MIN TIMELINE ============================ -->
+<section data-label="05 Timeline" class="slide cream-deep">
+  <div class="head">
+    <div class="section-tag">Agenda</div>
+    <div class="time">16:03 · Intro</div>
+  </div>
+
+  <div style="margin-top: 36px;">
+    <div class="kicker">60-MINUTE PLAN</div>
+    <h2 class="title">오늘의 60분</h2>
+    <h3 class="subtitle">본론 33분 &nbsp;+&nbsp; 시연 20분 &nbsp;+&nbsp; Intro·Closing 7분</h3>
+  </div>
+
+  <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; margin-top: 20px;">
+    <!-- Gantt-style timeline. Widths proportional to minutes (5,10,8,8,7,7,7,6,2 = 60) -->
+    <div class="timeline" style="height: 140px;">
+      <div class="seg meta"     style="flex: 5">
+        <div class="t">16:00</div><div class="n">Intro</div><div class="d">5</div>
+      </div>
+      <div class="seg chap"     style="flex: 10">
+        <div class="t">16:05</div><div class="n">Ch.1 맥락 3계층</div><div class="d">10</div>
+      </div>
+      <div class="seg chap"     style="flex: 8">
+        <div class="t">16:15</div><div class="n">Ch.2 아키텍처</div><div class="d">8</div>
+      </div>
+      <div class="seg chap"     style="flex: 8">
+        <div class="t">16:23</div><div class="n">Ch.3 개입 설계</div><div class="d">8</div>
+      </div>
+      <div class="seg chap"     style="flex: 7">
+        <div class="t">16:31</div><div class="n">Ch.4 에이전트</div><div class="d">7</div>
+      </div>
+      <div class="seg demo"     style="flex: 7">
+        <div class="t">16:38</div><div class="n">시연 1</div><div class="d">7</div>
+      </div>
+      <div class="seg demo"     style="flex: 7">
+        <div class="t">16:45</div><div class="n">시연 2</div><div class="d">7</div>
+      </div>
+      <div class="seg demo"     style="flex: 6">
+        <div class="t">16:52</div><div class="n">시연 3</div><div class="d">6</div>
+      </div>
+      <div class="seg meta"     style="flex: 2">
+        <div class="t">16:58</div><div class="n">Closing</div><div class="d">2</div>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 40px; margin-top: 40px; font-size: 22px; color: var(--ink-2);">
+      <div class="row gap-16 center"><span style="display:inline-block; width: 22px; height: 22px; background: #e8e1d0; border: 1px solid var(--ink);"></span>Intro · Closing</div>
+      <div class="row gap-16 center"><span style="display:inline-block; width: 22px; height: 22px; background: #d5deec; border: 1px solid var(--ink);"></span>Chapter 1 — 4 (본론)</div>
+      <div class="row gap-16 center"><span style="display:inline-block; width: 22px; height: 22px; background: #f2d5b8; border: 1px solid var(--ink);"></span>Live Demo</div>
+    </div>
+  </div>
+
+  <div class="serif" style="font-size: 28px; color: var(--muted); font-style: italic; margin-top: 30px;">
+    시연 3개가 이 세션의 <span class="ink" style="font-weight:700; font-style:normal;">물리적 증거</span>. 본론은 그 증거의 설계도.
+  </div>
+</section>
+
+
+<!-- ============================ SLIDE 6 — PROFILE ============================ -->
+<section data-label="06 Profile" class="slide">
+  <div class="head">
+    <div class="section-tag">Speaker</div>
+    <div class="time">16:04 · Intro</div>
+  </div>
+
+  <div style="margin-top: 36px;">
+    <div class="kicker">SYSTEM BUILDER</div>
+    <h2 class="title">시스템 빌더 박준</h2>
+    <h3 class="subtitle">Creator × Archive 하이브리드</h3>
+  </div>
+
+  <div style="flex: 1; display: flex; align-items: center; gap: 80px; margin-top: 40px;">
+    <!-- Quote + portrait -->
+    <div style="flex: 1; display: flex; flex-direction: column; gap: 36px;">
+      <div style="display: flex; align-items: center; gap: 28px;">
+        <div style="position: relative; flex-shrink: 0;">
+          <img src="assets/park_joon_v2.png" alt="박준" style="position: relative; width: 180px; height: 180px; border-radius: 50%; object-fit: cover; object-position: center 25%; display: block; background: #efeae1; border: 1.5px solid #1d3a6b;"/>
+        </div>
+        <div>
+          <div class="mono" style="font-size: 16px; letter-spacing: 0.12em; color: var(--muted); text-transform: uppercase; margin-bottom: 8px;">Park Joon</div>
+          <div class="serif" style="font-size: 38px; font-weight: 600; color: var(--ink); line-height: 1;">박 준</div>
+          <div style="margin-top: 10px; font-size: 18px; color: var(--ink-2);">교토대학교 AI 석사 · <b>JoonLab</b> 운영</div>
+          <div style="font-size: 16px; color: var(--muted); margin-top: 4px;">LG · SKT · SK · 국립농업과학원 강의 · 컨설팅</div>
+        </div>
+      </div>
+      <div class="serif" style="font-size: 34px; line-height: 1.5; color: var(--ink); letter-spacing: -0.005em; border-left: 3px solid #1d3a6b; padding-left: 24px;">
+        “한 번 겪은 일을
+        <span class="hl">두 번 반복하지 않도록</span>,
+        <br>
+        경험을 시스템으로 만들어
+        <br>
+        더 큰 것을 빌드하기 위해 기록한다.”
+        <div style="margin-top: 18px; font-size: 16px; letter-spacing: 0.12em; color: var(--muted); text-transform: uppercase; font-family: 'JetBrains Mono', monospace;">— My Why</div>
+      </div>
+    </div>
+
+    <!-- Radar chart -->
+    <div style="flex: 0 0 auto; display: flex; justify-content: center;">
+      <svg viewBox="0 0 560 560" style="width: 500px; height: 500px;">
+        <defs>
+          <pattern id="dots" width="6" height="6" patternUnits="userSpaceOnUse">
+            <circle cx="1" cy="1" r="0.8" fill="#1d3a6b" opacity="0.3"/>
+          </pattern>
+        </defs>
+        <!-- rings -->
+        <g fill="none" stroke="#d8cfbd" stroke-width="1">
+          <polygon points="280,80 470,215 398,440 162,440 90,215"/>
+          <polygon points="280,120 434,231 376,411 184,411 126,231"/>
+          <polygon points="280,160 398,247 355,382 205,382 162,247"/>
+          <polygon points="280,200 362,263 334,353 226,353 198,263"/>
+          <polygon points="280,240 326,279 312,324 248,324 234,279"/>
+        </g>
+        <!-- axes -->
+        <g stroke="#c7bda8" stroke-width="1">
+          <line x1="280" y1="280" x2="280" y2="80"/>
+          <line x1="280" y1="280" x2="470" y2="215"/>
+          <line x1="280" y1="280" x2="398" y2="440"/>
+          <line x1="280" y1="280" x2="162" y2="440"/>
+          <line x1="280" y1="280" x2="90" y2="215"/>
+        </g>
+        <!-- data: Problem Solver 4, Archive 5, Creator 5, Learner 3, Connector 4 -->
+        <!-- Top = Problem Solver (4), right = Archive (5), bottom-right = Creator (5), bottom-left = Learner (3), left = Connector (4) -->
+        <!-- Compute points: levels = 5 -> r=200; k=ratio
+             Top (4):  (280, 280 - 160) = (280, 120)
+             Right (5):(470, 215)
+             BR (5):   (398, 440)
+             BL (3):   (280 + (162-280)*0.6, 280 + (440-280)*0.6) = (280-70.8, 280+96) = (209.2, 376)
+             Left (4):(280 + (90-280)*0.8, 280 + (215-280)*0.8) = (280-152, 280-52) = (128, 228) -->
+        <polygon points="280,120 470,215 398,440 209,376 128,228"
+                 fill="#1d3a6b" fill-opacity="0.18" stroke="#1d3a6b" stroke-width="3"/>
+        <g fill="#1d3a6b">
+          <circle cx="280" cy="120" r="6"/>
+          <circle cx="470" cy="215" r="6"/>
+          <circle cx="398" cy="440" r="6"/>
+          <circle cx="209" cy="376" r="6"/>
+          <circle cx="128" cy="228" r="6"/>
+        </g>
+        <!-- labels -->
+        <g class="radar-label">
+          <text x="280" y="56"  text-anchor="middle">Problem Solver</text>
+          <text x="280" y="78"  text-anchor="middle" class="radar-sub">4</text>
+          <text x="496" y="206" text-anchor="start">Archive</text>
+          <text x="496" y="228" text-anchor="start" class="radar-sub">5 · MAX</text>
+          <text x="414" y="478" text-anchor="start">Creator</text>
+          <text x="414" y="500" text-anchor="start" class="radar-sub">5 · MAX</text>
+          <text x="146" y="478" text-anchor="end">Learner</text>
+          <text x="146" y="500" text-anchor="end" class="radar-sub">3</text>
+          <text x="74"  y="206" text-anchor="end">Connector</text>
+          <text x="74"  y="228" text-anchor="end" class="radar-sub">4</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div></div>
+    <div>06 / 28</div>
+  </div>
+</section>
+
+
+<!-- ============================ SLIDE 7 — STACK SIZE ============================ -->
+<section data-label="07 Stack Size" class="slide paper">
+  <div class="head">
+    <div class="section-tag">Stack</div>
+    <div class="time">16:04 · Intro</div>
+  </div>
+
+  <div style="margin-top: 36px;">
+    <div class="kicker">SCALE AS OF 2026-04-16</div>
+    <h2 class="title">5개월간 쌓은 시스템의 실측치</h2>
+    <h3 class="subtitle">가상이 아닌, 지금 제 맥북에 있는 실물.</h3>
+  </div>
+
+  <div style="flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; margin-top: 60px;">
+    <div class="kpi">
+      <div class="role">영구 맥락</div>
+      <div class="num">368<span class="u">줄</span></div>
+      <div style="font-size: 22px; color: var(--muted);">9 섹션</div>
+      <div class="label">글로벌 <b>CLAUDE.md</b> — AI에게 상시 적용되는 원칙·규칙의 총합</div>
+    </div>
+    <div class="kpi">
+      <div class="role">누적 맥락 · 판단</div>
+      <div class="num">17<span class="u">개</span></div>
+      <div style="font-size: 22px; color: var(--muted);">4 타입</div>
+      <div class="label"><b>Auto-Memory</b> — user / feedback / project / reference</div>
+    </div>
+    <div class="kpi">
+      <div class="role">누적 맥락 · 지식</div>
+      <div class="num">14<span class="u">개</span></div>
+      <div style="font-size: 22px; color: var(--muted);">4 폴더</div>
+      <div class="label"><b>PKM</b> — Modules · Research · Troubleshooting · Specs</div>
+    </div>
+    <div class="kpi" style="background: #141210; border-top-color: var(--accent-2); color: #f1ebdc;">
+      <div class="role" style="color: var(--accent-2);">누적 세션</div>
+      <div class="num" style="color: #fdf7e8;">1,803<span class="u" style="color:#a59c89;">개</span></div>
+      <div style="font-size: 22px; color: #a59c89;">2025-11 → 2026-04</div>
+      <div class="label" style="color: #c9c1ad;">누적 <b style="color:#f1ebdc;">Claude Code</b> 세션 — 5개월 연속 축적</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================ SLIDE 8 — CH.1 DIVIDER ============================ -->
+<section data-label="08 Ch.1 Cover" class="slide cream-deep">
+  <div class="head">
+    <div class="progress">
+      <span class="item cur"><span class="num">①</span> 구조 <span class="st">●</span></span>
+      <span class="item pend"><span class="num">②</span> 분리·연결 <span class="st">—</span></span>
+      <span class="item pend"><span class="num">③</span> 자율성 <span class="st">—</span></span>
+    </div>
+    <div class="time">16:05 — 16:15 · 10분</div>
+  </div>
+
+  <div class="watermark">01</div>
+
+  <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; position: relative; z-index: 2; max-width: 1400px;">
+    <div class="chap-label">CHAPTER ONE</div>
+    <h1 class="title serif" style="font-size: 144px; margin-top: 24px;">맥락의 3계층</h1>
+    <h3 class="subtitle" style="font-size: 42px; margin-top: 28px; max-width: 1200px;">
+      “성격 카드 · 추억 앨범 · 할 수 있는 일 목록”의 정체 공개
+    </h3>
+
+    <div style="margin-top: 80px; padding: 28px 0; border-top: 2px solid var(--ink); border-bottom: 1px solid var(--rule); max-width: 900px; font-size: 28px; line-height: 1.6;">
+      <b>숙제 ① 구조 — 여기서 답합니다.</b>
+      <span class="muted">&nbsp;&nbsp;·&nbsp;&nbsp;</span>
+      <span class="mono" style="font-size: 24px;">10 min</span>
+    </div>
+  </div>
+
+  <div class="foot"><div></div><div>08 / 28</div></div>
+</section>
+
+
+<!-- ============================ SLIDE 9 — TERM MAPPING ============================ -->
+<section data-label="09 Term Mapping" class="slide">
+  <div class="head">
+    <div class="progress">
+      <span class="item cur"><span class="num">①</span> 구조 <span class="st">●</span></span>
+      <span class="item pend"><span class="num">②</span> 분리·연결 <span class="st">—</span></span>
+      <span class="item pend"><span class="num">③</span> 자율성 <span class="st">—</span></span>
+    </div>
+    <div class="time">Ch.1 · 16:06</div>
+  </div>
+
+  <div style="margin-top: 24px;">
+    <div class="kicker">TRANSLATION TABLE</div>
+    <h2 class="title" style="font-size: 64px;">타래님 용어 → 박준 용어</h2>
+    <h3 class="subtitle">같은 것, 다른 이름. 1:1 번역기.</h3>
+  </div>
+
+  <div style="flex: 1; display: flex; align-items: center; margin-top: 30px;">
+    <table class="grid" style="font-size: 24px;">
+      <thead>
+        <tr>
+          <th style="width: 22%; background: #efe7d3;">타래님 비유</th>
+          <th style="width: 22%;">박준 용어</th>
+          <th style="width: 26%;">실체</th>
+          <th style="width: 30%;">박준의 실제 규모</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="first" style="background: #f6efdc;">성격 카드</td>
+          <td><b>영구 맥락</b></td>
+          <td class="mono" style="font-size: 22px;">CLAUDE.md</td>
+          <td>글로벌 <b>368줄</b> · 9섹션</td>
+        </tr>
+        <tr>
+          <td class="first" style="background: #f6efdc;">추억 앨범</td>
+          <td><b>누적 맥락</b></td>
+          <td class="mono" style="font-size: 22px;">Auto-Memory &nbsp;/&nbsp; PKM</td>
+          <td>Memory <b>17개</b> / PKM <b>14개</b></td>
+        </tr>
+        <tr>
+          <td class="first" style="background: #f6efdc;">할 수 있는 일 목록</td>
+          <td><b>Skills / Tools</b></td>
+          <td>역할별 스킬 세트</td>
+          <td><b>100+</b> skills · hooks</td>
+        </tr>
+        <tr>
+          <td class="first" style="background: #f6efdc;">이럴 때 이렇게</td>
+          <td><b>Skills 시스템</b></td>
+          <td>트리거 기반 호출</td>
+          <td>키워드 자동 감지</td>
+        </tr>
+        <tr>
+          <td class="first" style="background: #f6efdc;">여러 마리 키우기</td>
+          <td><b>SubAgent / 체인</b></td>
+          <td>병렬 · 분업</td>
+          <td>메인 = 지휘자, Task = 실무</td>
+        </tr>
+        <tr>
+          <td class="first" style="background: #f6efdc;">집사</td>
+          <td><b>설계자</b></td>
+          <td>구조 설계</td>
+          <td>기록이 곧 빌드인 순환</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+
+<!-- ============================ SLIDE 10 — 3 LAYERS ============================ -->
+<section data-label="10 Three Layers" class="slide paper">
+  <div class="head">
+    <div class="progress">
+      <span class="item cur"><span class="num">①</span> 구조 <span class="st">●</span></span>
+      <span class="item pend"><span class="num">②</span> 분리·연결 <span class="st">—</span></span>
+      <span class="item pend"><span class="num">③</span> 자율성 <span class="st">—</span></span>
+    </div>
+    <div class="time">Ch.1 · 16:09</div>
+  </div>
+
+  <div style="margin-top: 24px;">
+    <div class="kicker">FRAMEWORK</div>
+    <h2 class="title" style="font-size: 72px;">맥락의 3계층</h2>
+    <h3 class="subtitle">영구 &nbsp;·&nbsp; 누적 &nbsp;·&nbsp; 순간</h3>
+  </div>
+
+  <div style="flex: 1; display: flex; gap: 60px; margin-top: 40px; align-items: stretch;">
+    <!-- Table -->
+    <div style="flex: 2; display: flex; align-items: center;">
+      <table class="grid" style="font-size: 24px;">
+        <thead>
+          <tr>
+            <th style="width: 18%;">레이어</th>
+            <th style="width: 22%;">역할</th>
+            <th style="width: 24%;">Claude Code</th>
+            <th style="width: 18%;">업무 비유</th>
+            <th style="width: 18%;">타래님 비유</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="background: linear-gradient(90deg, #d7dfec 0%, transparent 55%);">
+            <td class="first">영구</td>
+            <td>원칙 · 규칙</td>
+            <td class="mono" style="font-size: 22px;">CLAUDE.md</td>
+            <td>사규 / SOP</td>
+            <td>성격 카드</td>
+          </tr>
+          <tr style="background: linear-gradient(90deg, #e5ebf2 0%, transparent 55%);">
+            <td class="first">누적</td>
+            <td>축적된 판단 기준</td>
+            <td class="mono" style="font-size: 22px;">Auto-Memory · PKM</td>
+            <td>팀 암묵지</td>
+            <td>추억 앨범</td>
+          </tr>
+          <tr style="background: linear-gradient(90deg, #eef1f5 0%, transparent 55%);">
+            <td class="first">순간</td>
+            <td>지금 상황</td>
+            <td class="mono" style="font-size: 22px;">대화 컨텍스트</td>
+            <td>오늘 업무 지시</td>
+            <td>오늘 기분</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Stack diagram -->
+    <div style="flex: 1; display: flex; flex-direction: column; gap: 14px; justify-content: center;">
+      <div class="mono" style="font-size: 18px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); text-align: center;">Stack · 위로 갈수록 휘발</div>
+      <div style="background: #e8ecf3; border: 1px solid #8a9bbd; padding: 22px 28px; font-size: 26px;">
+        <div class="mono" style="font-size: 18px; color: var(--muted);">순간</div>
+        <div style="font-weight: 600;">오늘의 대화 컨텍스트</div>
+      </div>
+      <div style="background: #b8c5dc; border: 1px solid #5f7ab0; padding: 28px 28px; font-size: 26px;">
+        <div class="mono" style="font-size: 18px; color: #3e4e6e;">누적</div>
+        <div style="font-weight: 700;">Auto-Memory · PKM</div>
+      </div>
+      <div style="background: #1d3a6b; color: #f1ebdc; padding: 36px 28px; font-size: 28px;">
+        <div class="mono" style="font-size: 18px; color: #a5b3cc;">영구</div>
+        <div style="font-weight: 700;">CLAUDE.md</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="serif" style="margin-top: 24px; font-size: 26px; font-style: italic; color: var(--muted);">
+    오늘 이 고양이가 어제와 다른 판단을 내렸다면, 그건 <span class="ink" style="font-weight: 700; font-style: normal;">순간 맥락</span>이 달라진 겁니다.
+  </div>
+</section>
+
+
+<!-- ============================ SLIDE 11 — CASE LG ============================ -->
+<section data-label="11 Case LG" class="slide cream-deep">
+  <div class="head">
+    <div class="progress">
+      <span class="item cur"><span class="num">①</span> 구조 <span class="st">●</span></span>
+      <span class="item pend"><span class="num">②</span> 분리·연결 <span class="st">—</span></span>
+      <span class="item pend"><span class="num">③</span> 자율성 <span class="st">—</span></span>
+    </div>
+    <div class="time">Ch.1 · 16:12</div>
+  </div>
+
+  <div style="margin-top: 24px;">
+    <div class="kicker">FIELD EVIDENCE · CH.1</div>
+    <h2 class="title" style="font-size: 66px;">프로토타입은 버려도, 정체성은 남는다</h2>
+    <h3 class="subtitle">LG인화원 교육용 AI Agent · v1 GPTs → v2 자체 웹앱</h3>
+  </div>
+
+  <div style="flex: 1; display: flex; gap: 50px; margin-top: 48px;">
+    <!-- Timeline column -->
+    <div style="flex: 1.1; display: flex; flex-direction: column; justify-content: center; gap: 20px;">
+      <div class="card" style="padding: 28px 32px;">
+        <div class="mono" style="font-size: 18px; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase;">v1</div>
+        <div style="font-size: 30px; font-weight: 700; margin-top: 4px;">GPTs 프로토타입</div>
+        <div style="font-size: 22px; color: var(--muted); margin-top: 6px;">속도 우선 · 검증 완료 후 폐기</div>
+      </div>
+      <div style="align-self: center; color: var(--muted); font-size: 42px;">↓</div>
+      <div class="card" style="padding: 28px 32px; border-color: var(--ink);">
+        <div class="mono" style="font-size: 18px; letter-spacing: 0.1em; color: var(--accent); text-transform: uppercase;">v2</div>
+        <div style="font-size: 30px; font-weight: 700; margin-top: 4px;">자체 웹앱</div>
+        <div style="font-size: 22px; color: var(--muted); margin-top: 6px;">
+          스택 전면 교체 — 그러나 <b style="color: var(--ink);">요구 사항의 핵심은 그대로</b>
+        </div>
+      </div>
+    </div>
+
+    <!-- Story column -->
+    <div style="flex: 1.5; display: flex; flex-direction: column; justify-content: center;">
+      <div class="serif" style="font-size: 36px; line-height: 1.45; color: var(--ink); padding-left: 28px; border-left: 3px solid var(--accent-2);">
+        “만들어놓은 거를 <span class="hl">나중에 주제 바꿔서 다시 쓸 수 있는 게</span> 중요해요.”
+      </div>
+      <div style="margin-top: 14px; font-size: 20px; color: var(--muted); padding-left: 28px;">— 고객사 담당자 요구 (익명)</div>
+
+      <ul class="clean tight" style="margin-top: 40px;">
+        <li><b class="mono" style="color: var(--accent); font-size: 22px;">박제 위치 1</b> &nbsp;·&nbsp; Memory의 <span class="mono">project_*</span> 파일</li>
+        <li><b class="mono" style="color: var(--accent); font-size: 22px;">박제 위치 2</b> &nbsp;·&nbsp; CLAUDE.md “멀티 프로그램 관리” 규칙</li>
+      </ul>
+    </div>
+  </div>
+
+  <div style="background: var(--ink); color: var(--paper); padding: 30px 40px; font-size: 30px; font-weight: 500; line-height: 1.45; margin-top: 40px;">
+    <span class="serif" style="color: var(--accent-2); font-weight: 700;">결론 ·</span>
+    &nbsp; 맥락이, 프로토타입을 버려도 <b>프로젝트의 정체성을 보존한다.</b>
+  </div>
+</section>
+
+
+<!-- ============================ SLIDE 12 — CH.2 DIVIDER ============================ -->
+<section data-label="12 Ch.2 Cover" class="slide">
+  <div class="head">
+    <div class="progress">
+      <span class="item"><span class="num">①</span> 구조 <span class="st done">✔</span></span>
+      <span class="item cur"><span class="num">②</span> 분리·연결 <span class="st">●</span></span>
+      <span class="item pend"><span class="num">③</span> 자율성 <span class="st">—</span></span>
+    </div>
+    <div class="time">16:15 — 16:23 · 8분</div>
+  </div>
+
+  <div class="watermark">02</div>
+
+  <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; position: relative; z-index: 2; max-width: 1400px;">
+    <div class="chap-label">CHAPTER TWO</div>
+    <h1 class="title serif" style="font-size: 144px; margin-top: 24px;">실전 아키텍처</h1>
+    <h3 class="subtitle" style="font-size: 42px; margin-top: 28px; max-width: 1200px;">
+      어떻게 나뉘어 있고, 어떻게 연결되는가.
+    </h3>
+
+    <div style="margin-top: 80px; padding: 28px 0; border-top: 2px solid var(--ink); border-bottom: 1px solid var(--rule); max-width: 900px; font-size: 28px; line-height: 1.6;">
+      <b>숙제 ② 분리·연결 — 여기서 답합니다.</b>
+      <span class="muted">&nbsp;&nbsp;·&nbsp;&nbsp;</span>
+      <span class="mono" style="font-size: 24px;">8 min</span>
+    </div>
+  </div>
+
+  <div class="foot"><div></div><div>12 / 28</div></div>
+</section>
+
+
+<!-- ============================ SLIDE 13 — ARCHITECTURE FLOW ============================ -->
+<section data-label="13 Architecture" class="slide paper">
+  <div class="head">
+    <div class="progress">
+      <span class="item"><span class="num">①</span> 구조 <span class="st done">✔</span></span>
+      <span class="item cur"><span class="num">②</span> 분리·연결 <span class="st">●</span></span>
+      <span class="item pend"><span class="num">③</span> 자율성 <span class="st">—</span></span>
+    </div>
+    <div class="time">Ch.2 · 16:16</div>
+  </div>
+
+  <div style="margin-top: 24px;">
+    <div class="kicker">INTEGRATED ARCHITECTURE</div>
+    <h2 class="title" style="font-size: 66px;">PKM + AI 통합 아키텍처</h2>
+    <h3 class="subtitle">설계자 → 영구 → 실행 → 누적 → 저장소</h3>
+  </div>
+
+  <div style="flex: 1; display: flex; gap: 80px; margin-top: 40px; align-items: center;">
+    <!-- Flow diagram -->
+    <div style="flex: 1; display: flex; flex-direction: column; align-items: stretch;">
+      <div class="flow-node">설계자 (인간)</div>
+      <div class="flow-arrow"></div>
+      <div class="flow-node"><span class="mono" style="font-size:22px; color:var(--muted);">영구</span> &nbsp; CLAUDE.md</div>
+      <div class="flow-arrow"></div>
+      <div class="flow-node accent-node">Claude Code &nbsp;→&nbsp; 작업 실행</div>
+      <div class="flow-arrow"></div>
+      <div class="flow-node"><span class="mono" style="font-size:22px; color:var(--muted);">누적</span> &nbsp; Auto-Memory</div>
+      <div class="flow-arrow"></div>
+      <div class="flow-node" style="border-color: var(--accent-2);">PKM · 저장소</div>
+    </div>
+
+    <!-- PKM tree -->
+    <div style="flex: 1;">
+      <div class="mono" style="font-size: 20px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent-2); margin-bottom: 14px;">PKM · 4 FOLDERS</div>
+      <div class="tree" style="font-size: 26px; line-height: 2;">
+<pre style="margin:0; font-family: inherit;">PKM/
+├── 11_Modules         <span style="color:var(--muted);">— 재사용 코드 · 패턴</span>
+├── 12_Research        <span style="color:var(--muted);">— 조사 결과</span>
+├── 13_Troubleshooting <span style="color:var(--muted);">— 에러·해결 기록</span>
+└── 14_Specs           <span style="color:var(--muted);">— 제품 명세</span></pre>
+      </div>
+      <div style="display:none;">
+        <br><b>실제 몸통.</b>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================ SLIDE 14 — ACTUAL STACK ============================ -->
+<section data-label="14 Actual Stack" class="slide cream-deep">
+  <div class="head">
+    <div class="progress">
+      <span class="item"><span class="num">①</span> 구조 <span class="st done">✔</span></span>
+      <span class="item cur"><span class="num">②</span> 분리·연결 <span class="st">●</span></span>
+      <span class="item pend"><span class="num">③</span> 자율성 <span class="st">—</span></span>
+    </div>
+    <div class="time">Ch.2 · 16:18</div>
+  </div>
+
+  <div style="margin-top: 20px;">
+    <div class="kicker">LIVE INVENTORY</div>
+    <h2 class="title" style="font-size: 60px;">박준의 실제 스택</h2>
+    <h3 class="subtitle">368줄 · 17개 · 14개 — 살아 있는 구조 &nbsp;<span class="mono" style="color:var(--accent-2); font-size: 22px;">★ = 시연 대상</span></h3>
+  </div>
+
+  <div style="flex: 1; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 28px; margin-top: 30px;">
+    <!-- CLAUDE.md -->
+    <div class="card" style="padding: 28px 32px; background: var(--paper); display: flex; flex-direction: column;">
+      <div class="mono" style="font-size: 18px; letter-spacing: 0.12em; color: var(--accent); text-transform: uppercase;">LAYER · PERMANENT</div>
+      <div style="font-size: 30px; font-weight: 700; margin: 6px 0 4px;" class="mono">CLAUDE.md</div>
+      <div style="font-size: 20px; color: var(--muted); margin-bottom: 12px;">368줄 · 9 섹션</div>
+      <div class="tree" style="font-size: 18px; line-height: 1.8;">
+<pre style="margin:0; font-family: inherit;">├─ (1) PKM 자동 참조 규칙
+├─ (2) 시스템 동기화
+├─ (3) 파일 정리 (<span style="color:#b33;">rm 금지</span>)
+├─ (4) NFC/NFD 복구 <span style="color:var(--muted);">[최장]</span>
+├─ (5) GitHub 작업 표준
+├─ (6) Claude Code 학습 모드
+├─ (7) cmux browser 강제
+├─ (8) graphify 슬래시
+└─ (9) PKM 시스템 개요</pre>
+      </div>
+    </div>
+
+    <!-- Auto-Memory -->
+    <div class="card" style="padding: 28px 32px; background: var(--paper); display: flex; flex-direction: column;">
+      <div class="mono" style="font-size: 18px; letter-spacing: 0.12em; color: var(--accent); text-transform: uppercase;">LAYER · CUMULATIVE · JUDGMENT</div>
+      <div style="font-size: 30px; font-weight: 700; margin: 6px 0 4px;" class="mono">Auto-Memory</div>
+      <div style="font-size: 20px; color: var(--muted); margin-bottom: 14px;">17개 파일 · 4 타입</div>
+      <div class="tree" style="font-size: 19px; line-height: 1.8;">
+<pre style="margin:0; font-family: inherit;"><span style="color:var(--muted);">TYPES</span>
+  user_*  ·  feedback_*
+  project_*  ·  reference_*
+
+<span style="color:var(--muted);">STATUS</span>
+  Active 7
+    family_cafe, korean_learning,
+    exec_edu_lms, edu_agent,
+    ax_session, ai_camp,
+    grad_school
+  Completed 3  ·  Inactive 1
+  Reference 3</pre>
+      </div>
+    </div>
+
+    <!-- PKM -->
+    <div class="card" style="padding: 28px 32px; background: var(--paper); display: flex; flex-direction: column;">
+      <div class="mono" style="font-size: 18px; letter-spacing: 0.12em; color: var(--accent); text-transform: uppercase;">LAYER · CUMULATIVE · KNOWLEDGE</div>
+      <div style="font-size: 30px; font-weight: 700; margin: 6px 0 4px;" class="mono">PKM</div>
+      <div style="font-size: 20px; color: var(--muted); margin-bottom: 14px;">14개 파일 · 4 폴더</div>
+      <div class="tree" style="font-size: 19px; line-height: 1.75;">
+<pre style="margin:0; font-family: inherit;">11_Modules        <span style="color:var(--muted);">(0 · 시드 대기)</span>
+12_Research       <span style="color:var(--muted);">(5)</span>
+  <span class="star">★</span> git-worktree
+  <span class="star">★</span> executive-ai-education
+  <span class="star">★</span> firebase-ios
+  <span class="star">★</span> pm2-supervisord
+  <span class="star">★</span> claude-code-multi-cli
+13_Troubleshooting <span style="color:var(--muted);">(2)</span>
+  <span class="star">★</span> raycast-secure-input
+    <span style="color:var(--accent-2);">  ← 시연 2</span>
+  · ctrl-z-suspend
+14_Specs          <span style="color:var(--muted);">(1)</span>
+  · lorotopik-앱</pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================ SLIDE 15 — 3-STEP FLOW ============================ -->
+<section data-label="15 Flow 3 Steps" class="slide">
+  <div class="head">
+    <div class="progress">
+      <span class="item"><span class="num">①</span> 구조 <span class="st done">✔</span></span>
+      <span class="item cur"><span class="num">②</span> 분리·연결 <span class="st">●</span></span>
+      <span class="item pend"><span class="num">③</span> 자율성 <span class="st">—</span></span>
+    </div>
+    <div class="time">Ch.2 · 16:20</div>
+  </div>
+
+  <div style="margin-top: 24px;">
+    <div class="kicker">FLYWHEEL</div>
+    <h2 class="title" style="font-size: 66px;">작업 흐름 3단계</h2>
+    <h3 class="subtitle">작업 전 &nbsp;·&nbsp; 작업 중 &nbsp;·&nbsp; 작업 후</h3>
+  </div>
+
+  <div style="flex: 1; display: grid; grid-template-columns: 1fr 40px 1fr 40px 1fr; gap: 0; align-items: stretch; margin-top: 60px;">
+    <!-- Card 1 -->
+    <div class="card" style="padding: 48px 44px; display: flex; flex-direction: column; background: var(--paper);">
+      <div class="mono" style="font-size: 22px; letter-spacing: 0.14em; color: var(--accent); text-transform: uppercase; font-weight: 700;">STEP · 01</div>
+      <div class="serif" style="font-size: 54px; font-weight: 700; margin-top: 8px; line-height: 1.1;">작업 전</div>
+      <div style="font-size: 24px; color: var(--ink-2); margin-top: 24px; line-height: 1.55;">
+        관련 PKM 폴더의 <span class="mono" style="font-size: 22px;">llms.txt</span> 조회
+      </div>
+      <div style="font-size: 22px; color: var(--muted); margin-top: auto; padding-top: 20px; line-height: 1.5;">
+        재사용 모듈 · 조사 · 해결 기록 확인
+      </div>
+    </div>
+
+    <div style="align-self: center; text-align: center; font-size: 48px; color: var(--muted);">→</div>
+
+    <!-- Card 2 -->
+    <div class="card" style="padding: 48px 44px; display: flex; flex-direction: column; background: var(--paper); border-color: var(--ink); border-width: 2px;">
+      <div class="mono" style="font-size: 22px; letter-spacing: 0.14em; color: var(--accent); text-transform: uppercase; font-weight: 700;">STEP · 02</div>
+      <div class="serif" style="font-size: 54px; font-weight: 700; margin-top: 8px; line-height: 1.1;">작업 중</div>
+      <div style="font-size: 24px; color: var(--ink-2); margin-top: 24px; line-height: 1.55;">
+        <b>영구 + 누적 + 순간</b> 맥락을 바탕으로 실행
+      </div>
+      <div style="font-size: 22px; color: var(--muted); margin-top: auto; padding-top: 20px; line-height: 1.5;">
+        세 레이어가 동시에 판단을 만든다
+      </div>
+    </div>
+
+    <div style="align-self: center; text-align: center; font-size: 48px; color: var(--muted);">→</div>
+
+    <!-- Card 3 -->
+    <div class="card" style="padding: 48px 44px; display: flex; flex-direction: column; background: var(--paper);">
+      <div class="mono" style="font-size: 22px; letter-spacing: 0.14em; color: var(--accent); text-transform: uppercase; font-weight: 700;">STEP · 03</div>
+      <div class="serif" style="font-size: 54px; font-weight: 700; margin-top: 8px; line-height: 1.1;">작업 후</div>
+      <div style="font-size: 24px; color: var(--ink-2); margin-top: 24px; line-height: 1.55;">
+        저장 가치 있으면 폴더 규칙대로 저장
+      </div>
+      <div style="font-size: 22px; color: var(--muted); margin-top: auto; padding-top: 20px; line-height: 1.5;">
+        <span class="mono" style="font-size: 20px;">llms.txt</span> 갱신 제안
+      </div>
+    </div>
+  </div>
+
+
+</section>
+
+
+<!-- ============================ SLIDE 16 — 3 CASE STUDIES ============================ -->
+<section data-label="16 Case Studies" class="slide paper">
+  <div class="head">
+    <div class="progress">
+      <span class="item"><span class="num">①</span> 구조 <span class="st done">✔</span></span>
+      <span class="item cur"><span class="num">②</span> 분리·연결 <span class="st">●</span></span>
+      <span class="item pend"><span class="num">③</span> 자율성 <span class="st">—</span></span>
+    </div>
+    <div class="time">Ch.2 · 16:22</div>
+  </div>
+
+  <div style="margin-top: 20px;">
+    <div class="kicker">EVIDENCE · CH.2</div>
+    <h2 class="title" style="font-size: 58px;">이 구조가 실제로 일한 증거 3건</h2>
+    <h3 class="subtitle">확장 &nbsp;·&nbsp; 재사용 &nbsp;·&nbsp; 파이프라인</h3>
+  </div>
+
+  <div style="flex: 1; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 32px; margin-top: 40px;">
+    <!-- Case 1 -->
+    <div style="display: flex; flex-direction: column; border-top: 3px solid var(--ink); padding-top: 24px;">
+      <div style="font-family:'Noto Serif KR'; font-weight: 900; font-size: 100px; line-height: 0.9; color: var(--ink);">01</div>
+      <div class="mono" style="font-size: 18px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 20px;">확장 / Scale-out</div>
+      <div style="font-size: 32px; font-weight: 700; line-height: 1.25; margin-top: 10px;">LG AX Camp LMS</div>
+      <div class="mono" style="font-size: 20px; color: var(--muted); margin-top: 4px;">lg.cmdspace.work</div>
+
+      <ul class="clean" style="margin-top: 20px;">
+        <li style="font-size: 22px;">소규모 경영진 교육 → <b>수백 명 규모 LMS</b>로 확장</li>
+        <li style="font-size: 22px;">배치 시스템(Batch 1~99)으로 복수 교육 동시 운영</li>
+        <li style="font-size: 22px;">“Batch 시스템 설계 결정”이 <b>Memory 박제</b> 덕에 가능</li>
+      </ul>
+
+      <div style="margin-top: auto; padding-top: 20px; font-size: 18px; color: var(--muted);" class="mono">
+        박제 위치 · Memory / project_exec_edu_lms.md
+      </div>
+    </div>
+
+    <!-- Case 2 -->
+    <div style="display: flex; flex-direction: column; border-top: 3px solid var(--ink); padding-top: 24px;">
+      <div style="font-family:'Noto Serif KR'; font-weight: 900; font-size: 100px; line-height: 0.9; color: var(--ink);">02</div>
+      <div class="mono" style="font-size: 18px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 20px;">재사용 / Reuse</div>
+      <div style="font-size: 32px; font-weight: 700; line-height: 1.25; margin-top: 10px;">SK에코플랜트 AI Camp</div>
+      <div class="mono" style="font-size: 20px; color: var(--muted); margin-top: 4px;">Same-day feedback loop</div>
+
+      <ul class="clean" style="margin-top: 20px;">
+        <li style="font-size: 22px;">점심 피드백 → gws Form → Agent team</li>
+        <li style="font-size: 22px;">→ Chart.js 대시보드 → <b>Vercel 즉시 배포</b></li>
+        <li style="font-size: 22px;">오후 첫 세션을 “방금 여러분의 피드백”으로 오픈</li>
+        <li style="font-size: 22px;">다음 차수부터는 <b>템플릿 복제 수준</b></li>
+      </ul>
+
+      <div style="margin-top: auto; padding-top: 20px; font-size: 18px; color: var(--muted);" class="mono">
+        박제 위치 · Memory / project_ai_camp.md
+      </div>
+    </div>
+
+    <!-- Case 3 -->
+    <div style="display: flex; flex-direction: column; border-top: 3px solid var(--ink); padding-top: 24px;">
+      <div style="font-family:'Noto Serif KR'; font-weight: 900; font-size: 100px; line-height: 0.9; color: var(--ink);">03</div>
+      <div class="mono" style="font-size: 18px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 20px;">파이프라인 / Pipeline</div>
+      <div style="font-size: 32px; font-weight: 700; line-height: 1.25; margin-top: 10px;">E4NET LoloTOPIK</div>
+      <div class="mono" style="font-size: 20px; color: var(--muted); margin-top: 4px;">7-step content pipeline</div>
+
+      <ul class="clean" style="margin-top: 20px;">
+        <li style="font-size: 20px; line-height: 1.4;">문제생성<span class="accent">(AI)</span> → 검토<span class="accent2">(H)</span> → 스크립트<span class="accent">(AI)</span> → 검토<span class="accent2">(H)</span> → SVG<span class="accent">(AI)</span> → PPT → 태깅<span class="accent2">(H)</span></li>
+        <li style="font-size: 22px;">확정 후 <b>3분기 병렬</b>: 다국어 TTS · 한국어 TTS · 동영상</li>
+        <li style="font-size: 22px;">“어디서 AI가 하고 어디서 사람이 끊는가”의 구조화</li>
+      </ul>
+
+      <div style="margin-top: auto; padding-top: 20px; font-size: 18px; color: var(--muted);" class="mono">
+        박제 위치 · Specs / lorotopik-앱.md
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================ SLIDE 17 — CH.3 DIVIDER ============================ -->
+<section data-label="17 Ch.3 Cover" class="slide cream-deep">
+  <div class="head">
+    <div class="progress">
+      <span class="item"><span class="num">①</span> 구조 <span class="st done">✔</span></span>
+      <span class="item"><span class="num">②</span> 분리·연결 <span class="st done">✔</span></span>
+      <span class="item pend"><span class="num">③</span> 자율성 <span class="st">—</span></span>
+    </div>
+    <div class="time">16:23 — 16:31 · 8분</div>
+  </div>
+
+  <div class="watermark">03</div>
+
+  <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; position: relative; z-index: 2; max-width: 1400px;">
+    <div class="chap-label">CHAPTER THREE</div>
+    <h1 class="title serif" style="font-size: 120px; margin-top: 24px;">인간 개입 지점 설계</h1>
+    <h3 class="subtitle" style="font-size: 40px; margin-top: 24px;">어디서 끊을 것인가.</h3>
+
+    <div class="serif" style="margin-top: 72px; font-size: 48px; line-height: 1.45; max-width: 1500px; color: var(--ink-2); font-style: italic; padding-left: 32px; border-left: 4px solid var(--accent-2);">
+      “자동화는 <span style="font-style: normal; font-weight: 700; color: var(--ink);">‘전부 맡기는 것’</span>이 아니라
+      <br>
+      <span style="font-style: normal; font-weight: 700; color: var(--ink);">‘어디서 끊을지’</span>를 고르는 일입니다.”
+    </div>
+  </div>
+
+  <div class="foot"><div></div><div>17 / 28</div></div>
+</section>
+
+
+<!-- ============================ SLIDE 18 — SPLIT × DEVICES ============================ -->
+<section data-label="18 Split x Devices" class="slide">
+  <div class="head">
+    <div class="progress">
+      <span class="item"><span class="num">①</span> 구조 <span class="st done">✔</span></span>
+      <span class="item"><span class="num">②</span> 분리·연결 <span class="st done">✔</span></span>
+      <span class="item pend"><span class="num">③</span> 자율성 <span class="st">—</span></span>
+    </div>
+    <div class="time">Ch.3 · 16:25</div>
+  </div>
+
+  <div style="margin-top: 24px;">
+    <div class="kicker">BOUNDARIES × LEVERS</div>
+    <h2 class="title" style="font-size: 66px;">끊는 지점 4개 · 장치 3개</h2>
+    <h3 class="subtitle">영역 × 장치의 매트릭스.</h3>
+  </div>
+
+  <div style="flex: 1; display: flex; gap: 60px; margin-top: 40px; align-items: center;">
+    <!-- Breakpoints table -->
+    <div style="flex: 1.4;">
+      <div class="mono" style="font-size: 20px; letter-spacing: 0.12em; color: var(--accent); text-transform: uppercase; margin-bottom: 16px;">끊는 지점 · 4 AREAS</div>
+      <table class="grid" style="font-size: 24px;">
+        <thead>
+          <tr>
+            <th style="width: 22%;">영역</th>
+            <th style="width: 39%;">AI가 하는 일</th>
+            <th style="width: 39%;">인간이 하는 일</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="first">코드</td><td>생성 · 리팩토링</td><td><b>아키텍처 결정</b></td></tr>
+          <tr><td class="first">지식</td><td>검색 · 요약</td><td><b>저장 · 폐기 판단</b></td></tr>
+          <tr><td class="first">판단</td><td>비교 · 옵션 제시</td><td><b>최종 결정</b></td></tr>
+          <tr><td class="first">실행</td><td>반복 작업</td><td><b>방향 전환</b></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Devices -->
+    <div style="flex: 1;">
+      <div class="mono" style="font-size: 20px; letter-spacing: 0.12em; color: var(--accent-2); text-transform: uppercase; margin-bottom: 16px;">Claude Code · 3 DEVICES</div>
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <div class="card" style="padding: 22px 28px; background: var(--paper);">
+          <div style="font-size: 26px; font-weight: 700;" class="mono">Hooks</div>
+          <div style="font-size: 22px; color: var(--ink-2); margin-top: 4px;">특정 이벤트에서 <b>자동 실행 / 차단</b></div>
+        </div>
+        <div class="card" style="padding: 22px 28px; background: var(--paper);">
+          <div style="font-size: 26px; font-weight: 700;" class="mono">Plan Mode</div>
+          <div style="font-size: 22px; color: var(--ink-2); margin-top: 4px;">실행 전 <b>계획 승인</b></div>
+        </div>
+        <div class="card" style="padding: 22px 28px; background: var(--paper);">
+          <div style="font-size: 26px; font-weight: 700;" class="mono">Memory 규칙</div>
+          <div style="font-size: 22px; color: var(--ink-2); margin-top: 4px;"><b>저장 / 망각</b>을 사용자가 규칙화</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="serif" style="font-size: 28px; font-style: italic; color: var(--muted); margin-top: 20px;">
+    자동화의 경계는 기능이 아니라 <span class="ink" style="font-style: normal; font-weight: 700;">‘누가 책임지는가’</span>.
+  </div>
+</section>
+
+
+<!-- ============================ SLIDE 19 — 3 PHILOSOPHIES ============================ -->
+<section data-label="19 Philosophies" class="slide paper">
+  <div class="head">
+    <div class="progress">
+      <span class="item"><span class="num">①</span> 구조 <span class="st done">✔</span></span>
+      <span class="item"><span class="num">②</span> 분리·연결 <span class="st done">✔</span></span>
+      <span class="item pend"><span class="num">③</span> 자율성 <span class="st">—</span></span>
+    </div>
+    <div class="time">Ch.3 · 16:28</div>
+  </div>
+
+  <div style="margin-top: 20px;">
+    <div class="kicker">OPERATING PRINCIPLES</div>
+    <h2 class="title" style="font-size: 64px;">박준다운 한 줄 3개</h2>
+    <h3 class="subtitle">CLAUDE.md에 실제로 박혀 있는 철학.</h3>
+  </div>
+
+  <div style="flex: 1; display: flex; flex-direction: column; gap: 20px; margin-top: 36px;">
+    <!-- P1 -->
+    <div class="card" style="padding: 24px 32px; display: flex; align-items: stretch; gap: 30px; background: var(--paper);">
+      <div style="width: 90px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; border-right: 1px solid var(--rule);">
+        <div class="serif" style="font-size: 68px; font-weight: 900; line-height: 1;">01</div>
+        <div class="mono" style="font-size: 16px; letter-spacing: 0.1em; color: var(--accent); margin-top: 6px;">DEFENSE</div>
+      </div>
+      <div style="flex: 1.2;">
+        <div class="serif" style="font-size: 34px; font-weight: 700; line-height: 1.3;">
+          “<span class="mono" style="font-size: 28px; color: #b33;">rm</span> 직접 삭제 절대 금지.”
+        </div>
+        <div style="font-size: 20px; color: var(--muted); margin-top: 6px;" class="mono">— CLAUDE.md · 71줄</div>
+      </div>
+      <div style="flex: 1.8; font-size: 22px; color: var(--ink-2); line-height: 1.5; align-self: center;">
+        <b>왜 ·</b> 2025/11 ~ 2026/01 세션 데이터 삭제 → 복구 불가
+        <br>
+        <b>규칙 ·</b> SHA-256 동일성 확인 후 휴지통 이동 · <span class="mono">moves.csv</span> 의무 로깅
+      </div>
+    </div>
+
+    <!-- P2 -->
+    <div class="card" style="padding: 24px 32px; display: flex; align-items: stretch; gap: 30px; background: var(--paper);">
+      <div style="width: 90px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; border-right: 1px solid var(--rule);">
+        <div class="serif" style="font-size: 68px; font-weight: 900; line-height: 1;">02</div>
+        <div class="mono" style="font-size: 16px; letter-spacing: 0.1em; color: var(--accent); margin-top: 6px;">ORCHESTRATION</div>
+      </div>
+      <div style="flex: 1.2;">
+        <div class="serif" style="font-size: 34px; font-weight: 700; line-height: 1.3;">
+          “메인은 <span class="hl2">지휘자</span>, Task Agent가 <span class="hl">실무</span>.”
+        </div>
+        <div style="font-size: 20px; color: var(--muted); margin-top: 6px;" class="mono">— feedback_agent_orchestration.md</div>
+      </div>
+      <div style="flex: 1.8; font-size: 22px; color: var(--ink-2); line-height: 1.5; align-self: center;">
+        <b>왜 ·</b> 메인 컨텍스트는 깨끗하게 유지
+        <br>
+        <b>근거 ·</b> 4회 이상 반복된 피드백이 박제된 결과
+      </div>
+    </div>
+
+    <!-- P3 -->
+    <div class="card" style="padding: 24px 32px; display: flex; align-items: stretch; gap: 30px; background: var(--paper);">
+      <div style="width: 90px; flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; border-right: 1px solid var(--rule);">
+        <div class="serif" style="font-size: 68px; font-weight: 900; line-height: 1;">03</div>
+        <div class="mono" style="font-size: 16px; letter-spacing: 0.1em; color: var(--accent); margin-top: 6px;">SELF-CHECK</div>
+      </div>
+      <div style="flex: 1.2;">
+        <div class="serif" style="font-size: 34px; font-weight: 700; line-height: 1.3;">
+          “AI 답의 <span class="hl">오류</span>를 전제로 설계.”
+        </div>
+        <div style="font-size: 20px; color: var(--muted); margin-top: 6px;" class="mono">— CLAUDE.md · 295~337줄</div>
+      </div>
+      <div style="flex: 1.8; font-size: 22px; color: var(--ink-2); line-height: 1.5; align-self: center;">
+        <b>왜 ·</b> claude-code-guide (Haiku)는 틀릴 수 있다
+        <br>
+        <b>방벽 ·</b> 공식 문서 <span class="mono">WebFetch</span>로 검증한 뒤에만 채택
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================ SLIDE 20 — 3 FOSSILIZED ERRORS ============================ -->
+<section data-label="20 Fossil Errors" class="slide cream-deep">
+  <div class="head">
+    <div class="progress">
+      <span class="item"><span class="num">①</span> 구조 <span class="st done">✔</span></span>
+      <span class="item"><span class="num">②</span> 분리·연결 <span class="st done">✔</span></span>
+      <span class="item pend"><span class="num">③</span> 자율성 <span class="st">—</span></span>
+    </div>
+    <div class="time">Ch.3 · 16:30</div>
+  </div>
+
+  <div style="margin-top: 20px;">
+    <div class="kicker">FOSSILIZED FAILURES</div>
+    <h2 class="title" style="font-size: 62px;">박제된 에러 3건</h2>
+    <h3 class="subtitle">아팠던 한 번이 영구 자산이 된 사례.</h3>
+  </div>
+
+  <div style="flex: 1; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 28px; margin-top: 32px;">
+    <!-- E1 -->
+    <div class="card" style="padding: 28px 28px; display: flex; flex-direction: column; background: var(--paper);">
+      <div style="display: flex; justify-content: space-between; align-items: baseline;">
+        <div class="mono" style="font-size: 18px; color: var(--accent-2); letter-spacing: 0.1em; font-weight: 700;">ERR-01</div>
+        <div class="mono" style="font-size: 16px; color: var(--muted);">2025-11 ~ 2026-01</div>
+      </div>
+      <div style="font-size: 26px; font-weight: 700; margin-top: 10px; line-height: 1.3;">세션 자동 삭제 사건</div>
+      <ul class="clean tight" style="margin-top: 12px;">
+        <li style="font-size: 20px;"><b>증상 ·</b> .jsonl 파일 사라짐 (복구 불가)</li>
+        <li style="font-size: 20px;"><b>원인 ·</b> 기본값 30일 자동 삭제</li>
+        <li style="font-size: 20px;"><b>해결 ·</b> <span class="mono" style="font-size: 18px;">cleanupPeriodDays: 99999</span></li>
+        <li style="font-size: 20px;"><b>주의 ·</b> 0 설정 시 .jsonl 생성 버그 <span class="mono" style="font-size: 18px;">(#23710)</span></li>
+      </ul>
+      <div style="margin-top: auto; padding-top: 14px; font-size: 18px; color: var(--muted);" class="mono">박제 · MEMORY.md / Critical Settings</div>
+    </div>
+
+    <!-- E2 -->
+    <div class="card" style="padding: 28px 28px; display: flex; flex-direction: column; background: var(--paper);">
+      <div style="display: flex; justify-content: space-between; align-items: baseline;">
+        <div class="mono" style="font-size: 18px; color: var(--accent-2); letter-spacing: 0.1em; font-weight: 700;">ERR-02</div>
+        <div class="mono" style="font-size: 16px; color: var(--muted);">2026-04-08</div>
+      </div>
+      <div style="font-size: 26px; font-weight: 700; margin-top: 10px; line-height: 1.3;">Gemini 429 RESOURCE_EXHAUSTED</div>
+      <ul class="clean tight" style="margin-top: 12px;">
+        <li style="font-size: 20px;"><b>증상 ·</b> 팀 4명 동시 Gemini Image pro → 전원 429</li>
+        <li style="font-size: 20px;"><b>원인 ·</b> 동일 API 키 프로젝트별 할당량 합산</li>
+        <li style="font-size: 20px;"><b>해결 ·</b> 동시 2명 이하 · <span class="mono" style="font-size: 18px;">sleep 30</span> · 순차 실행</li>
+      </ul>
+      <div style="margin-top: auto; padding-top: 14px; font-size: 18px; color: var(--muted);" class="mono">박제 · feedback_gemini_parallel_ratelimit.md</div>
+    </div>
+
+    <!-- E3 -->
+    <div class="card" style="padding: 28px 28px; display: flex; flex-direction: column; background: var(--paper);">
+      <div style="display: flex; justify-content: space-between; align-items: baseline;">
+        <div class="mono" style="font-size: 18px; color: var(--accent-2); letter-spacing: 0.1em; font-weight: 700;">ERR-03</div>
+        <div class="mono" style="font-size: 16px; color: var(--muted);">macOS</div>
+      </div>
+      <div style="font-size: 26px; font-weight: 700; margin-top: 10px; line-height: 1.3;">NFC vs NFD 사건</div>
+      <ul class="clean tight" style="margin-top: 12px;">
+        <li style="font-size: 20px;"><b>증상 ·</b> rename 후 <span class="mono" style="font-size: 18px;">claude -r</span> 시 “No conversation found…”</li>
+        <li style="font-size: 20px;"><b>원인 ·</b> <span class="mono" style="font-size: 17px;">realpathSync.normalize("NFC")</span> 후 대시 개수 불일치</li>
+        <li style="font-size: 20px;"><b>해결 ·</b> <b>6단계 수동 마이그레이션</b> 절차</li>
+      </ul>
+      <div style="margin-top: auto; padding-top: 14px; font-size: 18px; color: var(--muted);" class="mono">박제 · CLAUDE.md §4 (최장 섹션)</div>
+    </div>
+  </div>
+
+  <div style="background: var(--ink); color: var(--paper); padding: 26px 40px; margin-top: 28px; display: flex; align-items: center; gap: 20px;">
+    <span class="serif" style="color: var(--accent-2); font-weight: 700; font-size: 26px; letter-spacing: 0.06em;">FLYWHEEL</span>
+    <span style="font-size: 28px; font-weight: 500;">실패 &nbsp;→&nbsp; Memory/CLAUDE.md 박제 &nbsp;→&nbsp; <b>다음엔 AI가 이미 안다.</b></span>
+  </div>
+</section>
+
+
+<!-- ============================ SLIDE 21 — CH.4 DIVIDER ============================ -->
+<section data-label="21 Ch.4 Cover" class="slide">
+  <div class="head">
+    <div class="progress">
+      <span class="item"><span class="num">①</span> 구조 <span class="st done">✔</span></span>
+      <span class="item"><span class="num">②</span> 분리·연결 <span class="st done">✔</span></span>
+      <span class="item cur"><span class="num">③</span> 자율성 <span class="st">●</span></span>
+    </div>
+    <div class="time">16:31 — 16:38 · 7분</div>
+  </div>
+
+  <div class="watermark">04</div>
+
+  <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; position: relative; z-index: 2; max-width: 1400px;">
+    <div class="chap-label">CHAPTER FOUR</div>
+    <h1 class="title serif" style="font-size: 144px; margin-top: 24px;">에이전트 체인</h1>
+    <h3 class="subtitle" style="font-size: 40px; margin-top: 24px;">가족이 팀으로 일하는 법.</h3>
+
+    <div class="serif" style="margin-top: 72px; font-size: 38px; line-height: 1.5; max-width: 1500px; color: var(--ink-2); font-style: italic; padding-left: 32px; border-left: 4px solid var(--accent-2);">
+      “타래님은 고양이 네 마리를 <b style="font-style: normal; color: var(--ink);">‘나눠 키운다’</b>고 하셨죠.
+      <br>
+      업무에서도 똑같습니다.
+      <span style="font-style: normal; font-weight: 700; color: var(--ink);"> 한 에이전트에게 모든 걸 맡기지 않습니다.</span>”
+    </div>
+  </div>
+
+  <div class="foot">
+    <div><b>숙제 ③ 자율성 — 여기서 답합니다.</b></div>
+    <div>21 / 28</div>
+  </div>
+</section>
+
+
+<!-- ============================ SLIDE 22 — ROLE SPLIT ============================ -->
+<section data-label="22 Role Split" class="slide paper">
+  <div class="head">
+    <div class="progress">
+      <span class="item"><span class="num">①</span> 구조 <span class="st done">✔</span></span>
+      <span class="item"><span class="num">②</span> 분리·연결 <span class="st done">✔</span></span>
+      <span class="item cur"><span class="num">③</span> 자율성 <span class="st">●</span></span>
+    </div>
+    <div class="time">Ch.4 · 16:33</div>
+  </div>
+
+  <div style="margin-top: 20px;">
+    <div class="kicker">TEAM LOGIC</div>
+    <h2 class="title" style="font-size: 64px;">역할 분담 · 만능 에이전트의 함정</h2>
+    <h3 class="subtitle">팀 관리와 같은 논리.</h3>
+  </div>
+
+  <div style="flex: 1; display: flex; gap: 70px; align-items: center; margin-top: 36px;">
+    <!-- Roles table -->
+    <div style="flex: 1.3;">
+      <div class="mono" style="font-size: 20px; letter-spacing: 0.12em; color: var(--accent); text-transform: uppercase; margin-bottom: 14px;">에이전트 · 5 ROLES</div>
+      <table class="grid" style="font-size: 24px;">
+        <thead>
+          <tr>
+            <th style="width: 22%;">에이전트</th>
+            <th style="width: 40%;">역할</th>
+            <th style="width: 38%; background: #efe7d3;">고양이로 치면</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="first">리더</td><td>전체 흐름 조율</td><td style="background: #f6efdc;">총괄 집사 (후추봇)</td></tr>
+          <tr><td class="first">탐색</td><td>정보 수집</td><td style="background: #f6efdc;">기록냥이</td></tr>
+          <tr><td class="first">실행</td><td>작업 수행</td><td style="background: #f6efdc;">이오시냥</td></tr>
+          <tr><td class="first">검증</td><td>결과 점검</td><td style="background: #f6efdc;">결정이냥</td></tr>
+          <tr><td class="first">문서</td><td>기록 · 요약</td><td style="background: #f6efdc; font-style: italic; color: var(--muted);">(박준이 추가)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Why split -->
+    <div style="flex: 1;">
+      <div class="mono" style="font-size: 20px; letter-spacing: 0.12em; color: var(--accent-2); text-transform: uppercase; margin-bottom: 14px;">왜 나눠야 하는가</div>
+      <ul class="clean">
+        <li><b>만능 에이전트의 함정</b> — 다 잘하는 듯 보이지만 <b>맥락이 오염</b>됨</li>
+        <li><b>병렬 처리</b> — 탐색 · 실행 동시 시 <b>시간 반감</b></li>
+        <li><b>실패 격리</b> — 한 명 실패해도 전체 멀쩡</li>
+        <li><b>팀 관리와 같은 논리</b> — 사람 팀 짜는 원칙과 동일</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="serif" style="font-size: 28px; font-style: italic; color: var(--muted); margin-top: 20px;">
+    만능은 없다. <span class="ink" style="font-style: normal; font-weight: 700;">잘 짜인 팀</span>이 있을 뿐.
+  </div>
+</section>
+
+
+<!-- ============================ SLIDE 23 — 2 APPS / DAY ============================ -->
+<section data-label="23 Two Apps a Day" class="slide cream-deep">
+  <div class="head">
+    <div class="progress">
+      <span class="item"><span class="num">①</span> 구조 <span class="st done">✔</span></span>
+      <span class="item"><span class="num">②</span> 분리·연결 <span class="st done">✔</span></span>
+      <span class="item cur"><span class="num">③</span> 자율성 <span class="st">●</span></span>
+    </div>
+    <div class="time">Ch.4 · 16:36</div>
+  </div>
+
+  <div style="margin-top: 20px;">
+    <div class="kicker">PARALLEL ORCHESTRATION · 2026-04-02</div>
+    <h2 class="title" style="font-size: 70px;">하루 만에 2개 앱</h2>
+    <h3 class="subtitle">실전 병렬 오케스트레이션 · 지인 헬스장 사례.</h3>
+  </div>
+
+  <div style="flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 32px;">
+    <!-- App 1 -->
+    <div class="card" style="padding: 32px 36px; background: var(--paper); display: flex; flex-direction: column;">
+      <div style="display: flex; justify-content: space-between; align-items: baseline;">
+        <div>
+          <div class="mono" style="font-size: 18px; letter-spacing: 0.12em; color: var(--accent); font-weight: 700;">APP · 01</div>
+          <div style="font-size: 34px; font-weight: 700; margin-top: 6px;">운영 앱</div>
+        </div>
+        <div class="mono" style="font-size: 20px; color: var(--muted); text-align: right;">Next.js 16 + Recharts</div>
+      </div>
+      <ul class="clean tight" style="margin-top: 18px;">
+        <li style="font-size: 22px;">24개 운동 · 10개 루틴 · 30일 Mock</li>
+        <li style="font-size: 22px;"><b>Phase 1</b> — 인프라 + 디자인 동시</li>
+        <li style="font-size: 22px;"><b>Phase 2~4</b> — 대시보드 / 선택 / 진행 <span class="accent2">3 에이전트 동시</span></li>
+      </ul>
+    </div>
+
+    <!-- App 2 -->
+    <div class="card" style="padding: 32px 36px; background: var(--paper); display: flex; flex-direction: column;">
+      <div style="display: flex; justify-content: space-between; align-items: baseline;">
+        <div>
+          <div class="mono" style="font-size: 18px; letter-spacing: 0.12em; color: var(--accent); font-weight: 700;">APP · 02</div>
+          <div style="font-size: 34px; font-weight: 700; margin-top: 6px;">Blog Writer</div>
+        </div>
+        <div class="mono" style="font-size: 20px; color: var(--muted); text-align: right;">OpenRouter · Claude Sonnet 4.6</div>
+      </div>
+      <ul class="clean tight" style="margin-top: 18px;">
+        <li style="font-size: 22px;">스트리밍 생성 · 연령/톤 맞춤</li>
+        <li style="font-size: 22px;">리서치(cmux browser) + <b>인프라 병렬</b></li>
+        <li style="font-size: 22px;">백엔드 + 프론트엔드 <span class="accent2">병렬</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div style="margin-top: 28px; padding: 22px 36px; background: #141210; color: #e8e2ce; display: flex; align-items: center; gap: 20px; border-left: 4px solid var(--accent-2);">
+    <span class="mono" style="font-size: 16px; color: var(--accent-2); letter-spacing: 0.14em; font-weight: 700;">POINT</span>
+    <span class="serif" style="font-size: 26px; font-style: italic; line-height: 1.45;">
+      한 사람이 하루에 이걸 하려면, <b style="font-style: normal; color: #fdf7e8;">지휘자 위치</b>로 옮겨가는 수밖에 없습니다.
+    </span>
+  </div>
+</section>
+
+
+<!-- ============================ SLIDE 24 — DEMO 1 TEASER ============================ -->
+<section data-label="24 Demo 1 Teaser" class="slide dark" style="padding: 100px 120px;">
+  <div class="head">
+    <div class="section-tag" style="color: var(--accent-2);">LIVE DEMO · 1 / 3</div>
+    <div class="time" style="color: #a59c89;">16:38 — 16:45 · 7분</div>
+  </div>
+
+  <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 44px;">
+    <div>
+      <div class="kicker" style="color: var(--accent-2); margin-bottom: 20px;">DEMO · 01</div>
+      <h1 class="title serif" style="color: #fdf7e8; font-size: 100px; line-height: 1.1;">
+        CLAUDE.md + Memory<br>실물 공개
+      </h1>
+    </div>
+
+    <hr style="border: 0; border-top: 1px solid #3a3530; margin: 0; width: 160px;">
+
+    <div style="display: flex; flex-direction: column; gap: 22px; font-size: 38px; line-height: 1.4; color: #e8e2ce; font-family: 'Noto Serif KR'; font-weight: 500;">
+      <div><span class="mono" style="font-size: 24px; color: var(--accent-2); margin-right: 20px;">01</span>368줄 글로벌 CLAUDE.md를 열어본다</div>
+      <div><span class="mono" style="font-size: 24px; color: var(--accent-2); margin-right: 20px;">02</span>“rm 금지” 한 줄이 AI를 어떻게 멈추는지 라이브</div>
+      <div><span class="mono" style="font-size: 24px; color: var(--accent-2); margin-right: 20px;">03</span>미니 핸즈온 — 여러분의 영구 맥락 규칙 3개를 포스트잇에</div>
+    </div>
+  </div>
+
+  <div class="foot" style="color: #6f6659;">
+    <div class="mono" style="font-size: 20px; letter-spacing: 0.2em;">5 SEC → TERMINAL</div>
+    <div>24 / 28</div>
+  </div>
+</section>
+
+
+<!-- ============================ SLIDE 25 — DEMO 2 TEASER ============================ -->
+<section data-label="25 Demo 2 Teaser" class="slide dark" style="padding: 100px 120px; position: relative;">
+  <!-- watermark file -->
+  <div style="position: absolute; bottom: 80px; right: 80px; font-family: 'JetBrains Mono', monospace; font-size: 34px; color: #26221e; letter-spacing: -0.02em; white-space: nowrap;">
+    macos_raycast-hotkey-secure-input_260331.md
+  </div>
+
+  <div class="head">
+    <div class="section-tag" style="color: var(--accent-2);">LIVE DEMO · 2 / 3</div>
+    <div class="time" style="color: #a59c89;">16:45 — 16:52 · 7분</div>
+  </div>
+
+  <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 44px; position: relative; z-index: 2;">
+    <div>
+      <div class="kicker" style="color: var(--accent-2); margin-bottom: 20px;">DEMO · 02</div>
+      <h1 class="title serif" style="color: #fdf7e8; font-size: 92px; line-height: 1.1;">
+        3개월 전의 내가<br>미래의 나를 구조하다
+      </h1>
+    </div>
+
+    <hr style="border: 0; border-top: 1px solid #3a3530; margin: 0; width: 160px;">
+
+    <div style="display: flex; flex-direction: column; gap: 22px; font-size: 38px; line-height: 1.4; color: #e8e2ce; font-family: 'Noto Serif KR'; font-weight: 500;">
+      <div><span class="mono" style="font-size: 24px; color: var(--accent-2); margin-right: 20px;">01</span>Raycast가 갑자기 먹통 — 그때, AI에게 그대로 묻는다</div>
+      <div><span class="mono" style="font-size: 24px; color: var(--accent-2); margin-right: 20px;">02</span>3개월 전 내가 남긴 기록이 <b style="color: #fdf7e8;">3초 만에</b> 끌어올려진다</div>
+      <div style="font-style: italic; color: #b6ad90; font-size: 32px; padding-left: 62px;">기록은 과거의 자신이 미래의 자신에게 보내는 구명튜브.</div>
+    </div>
+  </div>
+
+  <div class="foot" style="color: #6f6659;">
+    <div class="mono" style="font-size: 20px; letter-spacing: 0.2em;">5 SEC → TERMINAL</div>
+    <div>25 / 28</div>
+  </div>
+</section>
+
+
+<!-- ============================ SLIDE 26 — DEMO 3 TEASER / META REVEAL ============================ -->
+<section data-label="26 Demo 3 Meta" class="slide dark" style="padding: 100px 120px; position: relative;">
+  <!-- Agent names watermark -->
+  <div style="position: absolute; top: 200px; right: 120px; font-family: 'JetBrains Mono', monospace; font-size: 22px; color: #2e2823; line-height: 2; text-align: right; letter-spacing: 0.05em;">
+    memory-analyst<br>pkm-analyst<br>content-integrator
+  </div>
+
+  <div class="head">
+    <div class="section-tag" style="color: var(--accent-2);">LIVE DEMO · 3 / 3 · META</div>
+    <div class="time" style="color: #a59c89;">16:52 — 16:58 · 6분</div>
+  </div>
+
+  <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 44px; position: relative; z-index: 2;">
+    <div>
+      <div class="kicker" style="color: var(--accent-2); margin-bottom: 20px;">DEMO · 03 — THE REVEAL</div>
+      <h1 class="title serif" style="color: #fdf7e8; font-size: 84px; line-height: 1.15;">
+        사실, 이 기획안도<br><span class="hl" style="background: linear-gradient(transparent 62%, rgba(196,106,43,0.6) 62%, rgba(196,106,43,0.6) 94%, transparent 94%); padding: 0 6px;">에이전트가 만들었습니다.</span>
+      </h1>
+    </div>
+
+    <hr style="border: 0; border-top: 1px solid #3a3530; margin: 0; width: 160px;">
+
+    <div style="display: flex; flex-direction: column; gap: 22px; font-size: 34px; line-height: 1.4; color: #e8e2ce; font-family: 'Noto Serif KR'; font-weight: 500; max-width: 1300px;">
+      <div><span class="mono" style="font-size: 22px; color: var(--accent-2); margin-right: 20px;">01</span>오늘 이 기획안 v3 — 에이전트 3명이 <b style="color: #fdf7e8;">병렬로</b> 만든 결과물</div>
+      <div><span class="mono" style="font-size: 22px; color: var(--accent-2); margin-right: 20px;">02</span>그 팀을 다시 열어, 여러분 앞에서 <b style="color: #fdf7e8;">새 작업</b>을 시킨다</div>
+      <div><span class="mono" style="font-size: 22px; color: var(--accent-2); margin-right: 20px;">03</span>Archive가 곧 Creator의 재료 — <b style="color: #fdf7e8;">기록이 팀이 된다</b></div>
+    </div>
+  </div>
+
+  <div class="foot" style="color: #6f6659;">
+    <div class="mono" style="font-size: 20px; letter-spacing: 0.2em;">5 SEC → AGENT LOGS</div>
+    <div>26 / 28</div>
+  </div>
+</section>
+
+
+<!-- ============================ SLIDE 27 — CLOSING ============================ -->
+<section data-label="27 Closing" class="slide paper" style="padding: 100px 140px;">
+  <div class="head">
+    <div class="progress">
+      <span class="item"><span class="num">①</span> 구조 <span class="st done">✔</span></span>
+      <span class="item"><span class="num">②</span> 분리·연결 <span class="st done">✔</span></span>
+      <span class="item"><span class="num">③</span> 자율성 <span class="st done">✔</span></span>
+    </div>
+    <div class="time">16:58 · Closing</div>
+  </div>
+
+  <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+    <div class="kicker" style="margin-bottom: 30px; text-align: center;">CLOSING — COMPLETING THE CIRCLE</div>
+    <h2 class="title serif" style="text-align: center; font-size: 76px; line-height: 1.18;">
+      <span class="hl2">재료</span>는 내가 저장한 나.
+      <span class="hl">설계</span>는 내가 만든 구조.
+    </h2>
+    <h3 class="subtitle" style="text-align: center; font-family: 'Noto Serif KR'; font-size: 40px; margin-top: 26px; color: var(--muted);">
+      오늘의 나를 내일의 AI에게 넘기는 일.
+    </h3>
+
+    <hr class="hair" style="margin: 60px auto 56px; width: 140px; border-color: var(--ink);">
+
+    <div class="serif" style="font-size: 34px; line-height: 1.6; max-width: 1400px; margin: 0 auto; text-align: center; color: var(--ink-2);">
+      타래님의 <b style="color: var(--ink);">‘고양이 가족’</b>과 제가 오늘 보여드린 <b style="color: var(--ink);">‘에이전트 팀’</b>은 사실 같은 이야기입니다.
+      <br><br>
+      고양이든 팀원이든, <span class="hl2">재료 없이 만들어지지 않습니다.</span> <span class="hl">구조 없이 움직이지 않습니다.</span>
+      <br><br>
+      시스템 빌더가 되는 건, 더 대단한 걸 만드는 게 아니라,
+      <br>
+      <b style="color: var(--ink);">한 번 한 일을 두 번 다시 하지 않는 것.</b>
+    </div>
+  </div>
+
+  <div style="margin-top: auto; text-align: center; font-size: 24px; color: var(--muted); line-height: 1.55; font-style: italic;" class="serif">
+    여러분 중 누구는 오늘 집에 가서 일기를 쓸 거고, 누구는 <span class="mono" style="font-style: normal; color: var(--ink-2);">CLAUDE.md</span>를 쓸 겁니다.
+    <span class="ink" style="font-style: normal; font-weight: 700;">&nbsp;둘 다 같은 일입니다.</span>
+  </div>
+</section>
+
+
+<!-- ============================ SLIDE 28 — TAKEAWAY ============================ -->
+<section data-label="28 Take Away" class="slide">
+  <div class="head">
+    <div class="section-tag">Monday Morning</div>
+    <div class="time">17:00 · End</div>
+  </div>
+
+  <div style="margin-top: 20px;">
+    <div class="kicker">TAKE AWAY</div>
+    <h2 class="title" style="font-size: 80px;">월요일 아침, 세 가지</h2>
+  </div>
+
+  <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 40px; padding: 0 40px;">
+    <!-- Item 1 -->
+    <div style="display: flex; gap: 48px; align-items: center;">
+      <div style="flex-shrink: 0; width: 140px; height: 140px; border-radius: 50%; border: 3px solid var(--ink); display: flex; align-items: center; justify-content: center; font-family: 'Noto Serif KR'; font-size: 80px; font-weight: 900;">1</div>
+      <div class="serif" style="font-size: 48px; line-height: 1.35; font-weight: 500;">
+        영구 맥락은 <span class="hl2">사규</span>, 누적 맥락은 <span class="hl2">암묵지</span>, 순간 맥락은 <span class="hl2">지시</span>다.
+      </div>
+    </div>
+
+    <!-- Item 2 -->
+    <div style="display: flex; gap: 48px; align-items: center;">
+      <div style="flex-shrink: 0; width: 140px; height: 140px; border-radius: 50%; border: 3px solid var(--ink); display: flex; align-items: center; justify-content: center; font-family: 'Noto Serif KR'; font-size: 80px; font-weight: 900;">2</div>
+      <div class="serif" style="font-size: 48px; line-height: 1.35; font-weight: 500;">
+        AI는 스스로 움직이지 않는다. <span class="hl">설계된 만큼</span> 일한다.
+      </div>
+    </div>
+
+    <!-- Item 3 -->
+    <div style="display: flex; gap: 48px; align-items: center;">
+      <div style="flex-shrink: 0; width: 140px; height: 140px; border-radius: 50%; border: 3px solid var(--ink); display: flex; align-items: center; justify-content: center; font-family: 'Noto Serif KR'; font-size: 80px; font-weight: 900;">3</div>
+      <div class="serif" style="font-size: 48px; line-height: 1.35; font-weight: 500;">
+        오늘의 나를 기록하면, <span class="hl">내일의 AI</span>가 그걸 먹고 자란다.
+      </div>
+    </div>
+  </div>
+
+  <div class="foot" style="padding-top: 30px; border-top: 2px solid var(--ink); align-items: center;">
+    <div class="serif" style="font-size: 30px; font-weight: 700; color: var(--ink);">
+      감사합니다.
+    </div>
+    <div style="font-size: 24px; color: var(--ink-2);">
+      박준 <span class="muted" style="margin-left: 8px;">/ JoonLab</span>
+    </div>
+  </div>
+</section>
+
+</deck-stage>
+
+<script src="deck-stage.js"></script>
+<script>
+  // Inject JoonLab logo into every slide at runtime
+  (function() {
+    const inject = () => {
+      document.querySelectorAll('section.slide').forEach(s => {
+        if (s.querySelector('.deck-logo')) return;
+        const img = document.createElement('img');
+        img.src = 'assets/joonlab_logo.png';
+        img.className = 'deck-logo';
+        img.alt = 'JoonLab';
+        s.appendChild(img);
+      });
+    };
+    if (document.readyState !== 'loading') inject();
+    else document.addEventListener('DOMContentLoaded', inject);
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Viewer · 맥락을 설계하는 개발자 · 박준</title>
+<link rel="icon" type="image/svg+xml" href="public/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles/viewer.css">
+</head>
+<body>
+<div class="viewer">
+  <div class="loading" id="loading">LOADING…</div>
+  <iframe
+    id="deckFrame"
+    class="viewer-frame"
+    src="deck/index.html"
+    title="Spring Camp 2026 · 박준 발표 덱"
+    allow="fullscreen"
+    allowfullscreen></iframe>
+
+  <div class="overlay overlay-top" id="overlayTop">
+    <a class="v-btn" href="index.html" aria-label="썸네일로 돌아가기">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3L5 8l5 5"/></svg>
+      <span class="label-long">썸네일</span>
+    </a>
+    <div class="v-counter" id="counter" aria-live="polite">01<span class="sep">/</span>29</div>
+    <div class="overlay-right">
+      <button class="v-btn icon" id="fsBtn" aria-label="전체화면 (F)" title="전체화면 (F)">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6V3h3M13 6V3h-3M3 10v3h3M13 10v3h-3"/></svg>
+      </button>
+      <a class="v-btn" href="public/spring-camp-2026-deck.pdf" download aria-label="PDF 다운로드">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v9M4 8l4 4 4-4M3 14h10"/></svg>
+        <span class="label-long">PDF</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="overlay overlay-bottom" id="overlayBottom">
+    <button class="nav-arrow" id="prevBtn" aria-label="이전 슬라이드 (←)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3L5 8l5 5"/></svg>
+    </button>
+    <button class="nav-arrow" id="nextBtn" aria-label="다음 슬라이드 (→)">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg>
+    </button>
+  </div>
+</div>
+
+<script src="js/slides.js"></script>
+<script src="js/viewer.js"></script>
+</body>
+</html>
