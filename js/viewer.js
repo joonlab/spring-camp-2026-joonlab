@@ -172,6 +172,33 @@
   prevBtn.addEventListener('click', (e) => { e.preventDefault(); prevSlide(); });
   nextBtn.addEventListener('click', (e) => { e.preventDefault(); nextSlide(); });
 
+  const tapPrev = document.getElementById('tapPrev');
+  const tapNext = document.getElementById('tapNext');
+  if (tapPrev) tapPrev.addEventListener('click', (e) => { e.preventDefault(); prevSlide(); });
+  if (tapNext) tapNext.addEventListener('click', (e) => { e.preventDefault(); nextSlide(); });
+
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchStartT = 0;
+  window.addEventListener('touchstart', (e) => {
+    const t = e.changedTouches && e.changedTouches[0];
+    if (!t) return;
+    touchStartX = t.clientX;
+    touchStartY = t.clientY;
+    touchStartT = Date.now();
+  }, { passive: true });
+  window.addEventListener('touchend', (e) => {
+    const t = e.changedTouches && e.changedTouches[0];
+    if (!t) return;
+    const dx = t.clientX - touchStartX;
+    const dy = t.clientY - touchStartY;
+    const dt = Date.now() - touchStartT;
+    if (dt > 600) return;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      if (dx < 0) nextSlide(); else prevSlide();
+    }
+  }, { passive: true });
+
   fsBtn.addEventListener('click', (e) => {
     e.preventDefault();
     const doc = document;
